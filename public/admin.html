@@ -163,24 +163,24 @@
       <div class="filter-pills" id="menu-filters">
         <div class="fpill active" onclick="filterMenu('all',this)">All</div>
         <div class="fpill" onclick="filterMenu('food',this)">Food</div>
-        <div class="fpill" onclick="filterMenu('bar',this)">Bar</div>
+        <div class="fpill" onclick="filterMenu('bar',this)">Drinks</div>
       </div>
       <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Category</th><th>Sub</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead><tbody id="menu-tbody"></tbody></table></div>
     </div>
 
     <div id="tab-categories" class="admin-content">
       <h3>Menu Categories</h3>
-      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">Manage subcategories for the Restaurant and Bar menus.</p>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">Manage subcategories for the Restaurant and Drinks menus.</p>
       <div class="cat-section-label"><i class="fas fa-utensils"></i> Restaurant Categories</div>
       <ul class="cat-list" id="food-cat-list"></ul>
       <div class="cat-add-row">
         <input type="text" id="new-food-cat" placeholder="New restaurant category name...">
         <button onclick="addCategory('food')"><i class="fas fa-plus"></i> Add</button>
       </div>
-      <div class="cat-section-label" style="margin-top:24px"><i class="fas fa-cocktail"></i> Bar Categories</div>
+      <div class="cat-section-label" style="margin-top:24px"><i class="fas fa-cocktail"></i> Drinks Categories</div>
       <ul class="cat-list" id="bar-cat-list"></ul>
       <div class="cat-add-row">
-        <input type="text" id="new-bar-cat" placeholder="New bar category name...">
+        <input type="text" id="new-bar-cat" placeholder="New drinks category name...">
         <button onclick="addCategory('bar')"><i class="fas fa-plus"></i> Add</button>
       </div>
     </div>
@@ -266,7 +266,7 @@
           loadAll();
         } else {
           document.getElementById('staff-view').classList.add('active');
-          document.getElementById('staff-header-title').textContent=data.role==='bartender'?'Bar Orders':'Live Orders';
+          document.getElementById('staff-header-title').textContent='Live Orders';
           loadStaffOrders();
           staffRefreshInterval=setInterval(loadStaffOrders,8000);
         }
@@ -317,7 +317,7 @@
         const items=o.items.map(i=>`${i.quantity}x ${i.name}`).join(', ');
         const time=new Date(o.created_at).toLocaleString();
         const sc={pending:'var(--warning)',preparing:'var(--bar)',ready:'var(--success)',completed:'var(--text-muted)',cancelled:'var(--error)'};
-        return `<tr><td><strong>${o.order_number}</strong></td><td>${o.table_name}</td><td>${o.type==='bar'?'🍸 Bar':'🍽 Food'}</td><td style="max-width:200px;font-size:0.8rem">${items}</td><td><strong>ETB ${o.total.toFixed(2)}</strong></td><td><span style="color:${sc[o.status]||'inherit'};font-weight:600;text-transform:capitalize">${o.status}</span></td><td style="font-size:0.75rem">${time}</td><td><select style="padding:4px;border-radius:4px;font-size:0.75rem;border:1px solid var(--border)" onchange="changeStatus(${o.id},this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="completed" ${o.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select></td></tr>`;
+        return `<tr><td><strong>${o.order_number}</strong></td><td>${o.table_name}</td><td>${o.type==='bar'?'🥤 Drinks':'🍽 Food'}</td><td style="max-width:200px;font-size:0.8rem">${items}</td><td><strong>ETB ${o.total.toFixed(2)}</strong></td><td><span style="color:${sc[o.status]||'inherit'};font-weight:600;text-transform:capitalize">${o.status}</span></td><td style="font-size:0.75rem">${time}</td><td><select style="padding:4px;border-radius:4px;font-size:0.75rem;border:1px solid var(--border)" onchange="changeStatus(${o.id},this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="completed" ${o.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select></td></tr>`;
       }).join('');
     }
     async function changeStatus(id,s){await fetch(`/api/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status:s})});loadOrders();}
@@ -327,7 +327,7 @@
     async function loadMenuTable(){
       let url='/api/menu'+(currentMenuFilter!=='all'?`?category=${currentMenuFilter}`:'');
       const res=await fetch(url);const items=await res.json();
-      document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong></td><td>${i.category==='bar'?'🍸 Bar':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${i.price.toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
+      document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong></td><td>${i.category==='bar'?'🥤 Drinks':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${i.price.toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
     }
     async function toggleAvail(id,av){await fetch(`/api/menu/${id}/availability`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({available:av})});loadMenuTable();}
     async function deleteItem(id){if(!confirm('Delete?'))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
@@ -339,7 +339,7 @@
     function openMenuModal(item=null){
       editId=item?item.id:null;
       document.getElementById('modal-title').textContent=item?'Edit Item':'Add Item';
-      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Bar</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Image URL</label><input type="text" id="m-img" value="${item?.image||''}">`;
+      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Image URL</label><input type="text" id="m-img" value="${item?.image||''}">`;
       document.getElementById('modal-save').onclick=saveMenu;
       document.getElementById('modal-overlay').classList.add('active');
     }
@@ -416,7 +416,7 @@
     async function toggleStaff(id,active){await fetch(`/api/staff/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({active})});loadStaffTable();}
     function openStaffModal(){
       document.getElementById('modal-title').textContent='Add Staff';
-      document.getElementById('modal-body').innerHTML=`<label>Username</label><input type="text" id="s-user" required><label>Full Name</label><input type="text" id="s-fname" required><label>Password</label><input type="text" id="s-pw" required><label>Role</label><select id="s-role"><option value="waiter">Waiter</option><option value="bartender">Bartender</option><option value="admin">Admin</option></select>`;
+      document.getElementById('modal-body').innerHTML=`<label>Username</label><input type="text" id="s-user" required><label>Full Name</label><input type="text" id="s-fname" required><label>Password</label><input type="text" id="s-pw" required><label>Role</label><select id="s-role"><option value="waiter">Waiter</option><option value="kitchen">Kitchen</option><option value="cashier">Cashier</option><option value="admin">Admin</option></select>`;
       document.getElementById('modal-save').onclick=async()=>{
         await fetch('/api/staff',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({username:document.getElementById('s-user').value,full_name:document.getElementById('s-fname').value,password:document.getElementById('s-pw').value,role:document.getElementById('s-role').value})});
         closeModal();loadStaffTable();
@@ -455,7 +455,7 @@
         `).join('');
         return `<div class="order-card status-${o.status}">
           <div class="order-header"><span class="order-number">${o.order_number}</span><span class="order-table"><i class="fas fa-chair"></i> ${o.table_name}</span></div>
-          <div class="order-time"><i class="fas fa-clock"></i> ${time} (${agoStr}) · ${o.type==='bar'?'🍸 Bar':'🍽 Food'}</div>
+          <div class="order-time"><i class="fas fa-clock"></i> ${time} (${agoStr}) · ${o.type==='bar'?'🥤 Drinks':'🍽 Food'}</div>
           <ul class="order-items">${items}</ul>
           ${o.special_notes?`<div class="order-notes"><i class="fas fa-sticky-note"></i> ${o.special_notes}</div>`:''}
           ${amendHtml}
@@ -478,9 +478,9 @@
     async function loadAnalytics(period,el){
       if(el){document.querySelectorAll('.period-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');}
       const res=await fetch(`/api/analytics?period=${period}`,{headers:{'Authorization':token}});const a=await res.json();
-      document.getElementById('stat-grid').innerHTML=`<div class="stat-card"><div class="stat-val">${a.totalOrders}</div><div class="stat-label">Total Orders</div></div><div class="stat-card"><div class="stat-val">ETB ${a.totalRevenue}</div><div class="stat-label">Total Revenue</div></div><div class="stat-card"><div class="stat-val">ETB ${a.foodRevenue}</div><div class="stat-label">Food (${a.foodOrdersCount})</div></div><div class="stat-card"><div class="stat-val">ETB ${a.barRevenue}</div><div class="stat-label">Bar (${a.barOrdersCount})</div></div>`;
+      document.getElementById('stat-grid').innerHTML=`<div class="stat-card"><div class="stat-val">${a.totalOrders}</div><div class="stat-label">Total Orders</div></div><div class="stat-card"><div class="stat-val">ETB ${a.totalRevenue}</div><div class="stat-label">Total Revenue</div></div><div class="stat-card"><div class="stat-val">ETB ${a.foodRevenue}</div><div class="stat-label">Food (${a.foodOrdersCount})</div></div><div class="stat-card"><div class="stat-val">ETB ${a.barRevenue}</div><div class="stat-label">Drinks (${a.barOrdersCount})</div></div>`;
       const fp=a.totalRevenue>0?(parseFloat(a.foodRevenue)/parseFloat(a.totalRevenue)*100).toFixed(0):0;
-      document.getElementById('revenue-chart').innerHTML=`<div style="display:flex;height:24px;border-radius:12px;overflow:hidden;margin-bottom:8px"><div style="width:${fp}%;background:var(--primary)"></div><div style="width:${100-fp}%;background:var(--bar)"></div></div><div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>🍽 Food: ETB ${a.foodRevenue} (${fp}%)</span><span>🍸 Bar: ETB ${a.barRevenue} (${100-fp}%)</span></div><div style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">Avg Order: <strong>ETB ${a.avgOrderValue}</strong></div>`;
+      document.getElementById('revenue-chart').innerHTML=`<div style="display:flex;height:24px;border-radius:12px;overflow:hidden;margin-bottom:8px"><div style="width:${fp}%;background:var(--primary)"></div><div style="width:${100-fp}%;background:var(--bar)"></div></div><div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>🍽 Food: ETB ${a.foodRevenue} (${fp}%)</span><span>🥤 Drinks: ETB ${a.barRevenue} (${100-fp}%)</span></div><div style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">Avg Order: <strong>ETB ${a.avgOrderValue}</strong></div>`;
       document.getElementById('top-items-list').innerHTML=a.topItems.length?a.topItems.map(([n,c])=>{const mx=a.topItems[0][1];return `<li><span>${n}</span><span>${c} orders</span></li><div class="bar" style="width:${c/mx*100}%"></div>`;}).join(''):'<li style="color:var(--text-muted)">No data yet</li>';
       const maxH=Math.max(...Object.values(a.hourlyData),1);
       document.getElementById('hourly-chart').innerHTML=Object.entries(a.hourlyData).map(([h,c])=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:100%;background:var(--primary);height:${c/maxH*100}px;border-radius:2px 2px 0 0;min-height:2px"></div><span style="font-size:0.55rem;color:var(--text-muted);margin-top:2px">${h}h</span></div>`).join('')||'<p style="color:var(--text-muted);font-size:0.8rem">No data</p>';

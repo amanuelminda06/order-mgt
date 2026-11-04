@@ -58,7 +58,7 @@ async function main() {
   let res = await fetch(`${base}/api/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'admin', password: 'admin' }),
+    body: JSON.stringify({ username: 'admin', password: 'Admin123' }),
   });
   let login = await expect('POST /api/login (valid admin)', res, 200);
   const adminTok = login && login.token;
@@ -78,13 +78,13 @@ async function main() {
 
   res = await fetch(`${base}/api/staff`, { headers: { Authorization: adminTok } });
   let staff = await expect('GET /api/staff (admin)', res, 200);
-  check('GET /api/staff returns 3 seed users', () => assert.strictEqual(staff.length, 3));
+  check('GET /api/staff returns 4 seed users', () => assert.strictEqual(staff.length, 4));
 
   // Waiter token for role-matrix checks
   res = await fetch(`${base}/api/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'waiter', password: 'admin' }),
+    body: JSON.stringify({ username: 'waiter1', password: 'Waiter123' }),
   });
   const waiterLogin = await expect('POST /api/login (waiter)', res, 200);
   const waiterTok = waiterLogin.token;
@@ -109,10 +109,10 @@ async function main() {
 
   res = await fetch(`${base}/api/menu`);
   const menu = await expect('GET /api/menu (public)', res, 200);
-  check('GET /api/menu seeds 20 items', () => assert.strictEqual(menu.length, 20));
-  check('menu has food + bar categories', () => {
+  check('GET /api/menu seeds 114 items', () => assert.strictEqual(menu.length, 114));
+  check('menu has food + drink items (legacy value "bar")', () => {
     assert.ok(menu.some((i) => i.category === 'food'), 'no food items');
-    assert.ok(menu.some((i) => i.category === 'bar'), 'no bar items');
+    assert.ok(menu.some((i) => i.category === 'bar'), 'no drink items');
   });
 
   res = await fetch(`${base}/api/menu?available=true&category=food`);
@@ -121,7 +121,7 @@ async function main() {
 
   res = await fetch(`${base}/api/categories`);
   const cats = await expect('GET /api/categories (public)', res, 200);
-  check('GET /api/categories seeds 7', () => assert.strictEqual(cats.length, 7));
+  check('GET /api/categories seeds 15', () => assert.strictEqual(cats.length, 15));
 
   res = await fetch(`${base}/api/settings`);
   const settings = await expect('GET /api/settings (public)', res, 200);
@@ -210,7 +210,8 @@ async function main() {
   });
   const order = await expect('POST /api/orders (public, no auth)', res, 200);
   const orderId = order.order_id;
-  check('order total = 2*28 + 10 = 66', () => assert.strictEqual(order.total, 66));
+  // item 1 = French Toast 500, item 7 = Croissant with Egg & Cheese 600
+  check('order total = 2*500 + 600 = 1600', () => assert.strictEqual(order.total, 1600));
   check('order_number is ORD-*', () => assert.ok(/^ORD-\d+$/.test(order.order_number)));
   check('order items echoed', () => assert.strictEqual(order.items.length, 2));
 
@@ -302,7 +303,11 @@ async function main() {
   });
   await expect('POST /api/staff (duplicate username -> 400)', res, 400);
 
-  res = await fetch(`${base}/api/staff/4`, {
+  // POST /api/staff returns no id (legacy), so look the new user up.
+  const staffNow = await (await fetch(`${base}/api/staff`, { headers: { Authorization: adminTok } })).json();
+  const smokeId = staffNow.find((s) => s.username === 'smokeuser').id;
+
+  res = await fetch(`${base}/api/staff/${smokeId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: adminTok },
     body: JSON.stringify({ active: false }),

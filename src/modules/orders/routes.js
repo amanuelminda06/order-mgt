@@ -58,8 +58,8 @@ router.post('/api/orders', async (req, res) => {
   orders.push(order);
 
   const itemList = orderItems.map((i) => `  ${i.quantity}x ${i.name}`).join('\n');
-  const emoji = type === 'bar' ? '🍸' : '🍽';
-  const telegramMsg = `${emoji} <b>NEW ${type === 'bar' ? 'BAR' : 'FOOD'} ORDER</b>
+  const emoji = type === 'bar' ? '🥤' : '🍽';
+  const telegramMsg = `${emoji} <b>NEW ${type === 'bar' ? 'DRINKS' : 'FOOD'} ORDER</b>
 
 📋 <b>${orderNumber}</b>
 🪑 Table ${table.name} (#${table.table_number})

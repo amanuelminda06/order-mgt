@@ -307,27 +307,32 @@ select n,
 from generate_series(1, 30) as n;
 ```
 
-**4d. Menu categories** (food / drink sections; drinks are categories, not a
-separate "bar"):
+**4d. Menu** — the real menu is seeded by `sql/004_menu.sql` (applied by
+`scripts/db-setup.js` right after this file): **15 sections** (9 `food` +
+6 `drink`) and **114 items**, all prices in ETB.
 
-```sql
-insert into menu_categories (name, name_am, section, sort_order) values
-  ('Cakes',        'ኬክ',      'food',  1),
-  ('Pastries',     'የጤማ እህሎች','food',  2),
-  ('Sandwiches',   'ሳንድዊች',  'food',  3),
-  ('Coffee',       'ቡና',      'drink', 1),
-  ('Tea',          'ሻይ',      'drink', 2),
-  ('Juices',       'ጭማሪ',    'drink', 3),
-  ('Cold Drinks',  'ቀዝቃዛ መጠጦች','drink', 4);
+```bash
+node scripts/db-setup.js     # applies 001–004 + runs the verification checks
 ```
 
-Menu items are **not** seeded — the real menu arrives later. Seed 2–3
-clearly-labelled placeholders if you need to test the upload flow:
+The sections are: Breakfast, Pasta, Salads, Pizza, Main Dish, Burger &
+Sandwich, Desserts, Cupcakes, Ice Cream *(food)* · Coffee, Iced Coffee,
+Milk-Infused, Juices & Smoothies, Tea, Soft Drinks *(drink)*.
 
-```sql
-insert into menu_items (name, description, category_id, price) values
-  ('[PLACEHOLDER] Sample Cake', 'Replace via admin upload', 
-   (select id from menu_categories where name = 'Cakes'), 100.00);
+Two notes:
+
+- The section value is `drink` in the DB, but the legacy client code still
+  uses the internal value `bar` for the same thing. The **UI label is
+  "Drinks"** everywhere; only the internal value differs (renamed when the
+  read paths move to Supabase).
+- `004_menu.sql` wipes and reseeds `menu_categories` + `menu_items`, but it
+  **refuses to run** once any `order_items` row exists, so it can never
+  orphan live orders.
+
+To reseed the menu by hand instead:
+
+```bash
+psql "$SUPABASE_DB_URL" -f sql/004_menu.sql
 ```
 
 ---
@@ -439,23 +444,29 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 12. **Images** are uploaded to Supabase Storage and stored as `image_path`
     (bucket-relative), never as a full URL. Limits: logo 2 MB, hero/menu 5
     MB, png/jpg/svg/webp only.
-13. **Content is placeholder** — real menu, logo, hero and address arrive
-    later and are replaced through the admin upload screens. Placeholders are
-    clearly marked `[PLACEHOLDER]`.
-14. **RLS is enabled**; the server uses the service-role key. Anon-key
+13. **Menu is real; brand assets are placeholder** — the 15-section /
+    114-item menu is seeded from `sql/004_menu.sql`. Logo, hero, address,
+    phone and email still arrive later and are replaced through the admin
+    upload/settings screens; remaining placeholders are clearly marked
+    `[PLACEHOLDER]`.
+14. **Service charge** — menu prices are inclusive of 15% VAT **and 10%
+    service charge**, but only VAT is modelled in the schema today. The
+    10% service charge is added in the money step (Step 8 of
+    `MIGRATION_PLAN.md`).
+15. **RLS is enabled**; the server uses the service-role key. Anon-key
     policies exist only for public menu/category reads if client-side access
     is added later.
-15. **Language**: English and Amharic. `default_language` is `en`; menu items
+16. **Language**: English and Amharic. `default_language` is `en`; menu items
     carry `name_am` / `description_am`; the user toggle persists per device.
     Amharic is LTR, so no RTL handling is required.
-16. **Telegram stays optional** — no-op when `TELEGRAM_BOT_TOKEN` /
+17. **Telegram stays optional** — no-op when `TELEGRAM_BOT_TOKEN` /
     `TELEGRAM_CHAT_ID` are unset — and messages become localized and use the
     configured currency (the legacy hardcoded `ETB` goes away with them).
-17. **`order_number_seq` is a plain Postgres `SEQUENCE` starting at 1001** —
+18. **`order_number_seq` is a plain Postgres `SEQUENCE` starting at 1001** —
     no wrap-around, so `order_no` is unique forever. Postgres sequences are
     allocation-based (nextval is atomic), so concurrent orders cannot receive
     the same number.
-18. **Audit scope**: every staff mutation (orders, status changes,
+19. **Audit scope**: every staff mutation (orders, status changes,
     cancellations, menu, categories, tables, users, passwords, settings,
     uploads) writes to `audit_log` with before/after JSON. Customer reads are
     not audited.
@@ -469,7 +480,8 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 - [ ] RLS enabled on all 8 tables (the sequence needs none)
 - [ ] `pgcrypto` extension enabled
 - [ ] Three storage buckets created with policies
-- [ ] `002_seed.sql` run — settings, users, 30 tables, categories
+- [ ] `002_seed.sql` run — settings, users, 30 tables
+- [ ] `004_menu.sql` run — 15 categories, 114 items
 - [ ] `order_number_seq` created as a SEQUENCE starting at 1001
 - [ ] `calc_order_total()` created
 - [ ] Verification queries in §7 all return expected values

@@ -7,7 +7,7 @@
 
 -- ── a. Settings ──────────────────────────────────────────────
 insert into settings (key, value) values
-  ('brand_name',                '"Cupcake Delight"'),
+  ('brand_name',                '"Cupcake Delights"'),
   ('brand_name_am',             '"ኩፕኬክ ደላይት"'),
   ('tagline',                   '"Freshly baked, every day"'),
   ('tagline_am',                '"በየቀኑ አዲስ የተጋገረ"'),
@@ -47,21 +47,6 @@ select n,
 from generate_series(1, 30) as n
 where not exists (select 1 from tables t where t.table_number = n);
 
--- ── d. Menu categories ───────────────────────────────────────
-insert into menu_categories (name, name_am, section, sort_order) values
-  ('Cakes',       'ኬክ',           'food',  1),
-  ('Pastries',    'የጤማ እህሎች',    'food',  2),
-  ('Sandwiches',  'ሳንድዊች',       'food',  3),
-  ('Coffee',      'ቡና',           'drink', 1),
-  ('Tea',         'ሻይ',           'drink', 2),
-  ('Juices',      'ጭማሪ',         'drink', 3),
-  ('Cold Drinks', 'ቀዝቃዛ መጠጦች', 'drink', 4)
-on conflict (name, section) do nothing;
-
--- ── e. Placeholder menu item (replace via admin upload) ──────
-insert into menu_items (name, description, category_id, price)
-select '[PLACEHOLDER] Sample Cake',
-       'Replace this item with the real menu via the admin panel',
-       (select id from menu_categories where name = 'Cakes' and section = 'food'),
-       100.00
-where not exists (select 1 from menu_items);
+-- ── d/e. Menu categories & items ──────────────────────────────
+-- NOT seeded here: the full menu lives in 004_menu.sql (15 sections,
+-- 114 items). db-setup.js applies it right after this file.

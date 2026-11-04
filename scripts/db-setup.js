@@ -76,7 +76,13 @@ const CHECKS = [
   ['4 seed users active', `select count(*) n from users where active`, (r) => Number(r.n) === 4],
   ['no order_amendments table', `select to_regclass('public.order_amendments') n`, (r) => r.n === null],
   ['no public_token column', `select count(*) n from information_schema.columns where column_name in ('public_token','must_change_password')`, (r) => Number(r.n) === 0],
-  ['7 menu categories', `select count(*) n from menu_categories`, (r) => Number(r.n) === 7],
+  ['15 menu categories', `select count(*) n from menu_categories`, (r) => Number(r.n) === 15],
+  ['114 menu items', `select count(*) n from menu_items`, (r) => Number(r.n) === 114],
+  ['9 food + 6 drink categories', `select count(*) filter (where section='food')::int f, count(*) filter (where section='drink')::int d from menu_categories`, (r) => Number(r.f) === 9 && Number(r.d) === 6],
+  ['every item has a category', `select count(*) n from menu_items m left join menu_categories c on c.id=m.category_id where c.id is null`, (r) => Number(r.n) === 0],
+  ['all prices are numeric(12,2)-safe and positive', `select count(*) n from menu_items where price < 0 or price <> round(price,2)`, (r) => Number(r.n) === 0],
+  ['sample price: Delight Special Pizza = 980', `select price::text n from menu_items where name='Delight Special Pizza'`, (r) => r.n === '980.00'],
+  ['brand name = Cupcake Delights', `select value#>>'{}' n from settings where key='brand_name'`, (r) => r.n === 'Cupcake Delights'],
   ['calc_order_total() exists', `select count(*) n from pg_proc where proname='calc_order_total'`, (r) => Number(r.n) === 1],
   ['RLS on all 8 tables', `select count(*) n from pg_class c join pg_namespace nsp on nsp.oid=c.relnamespace where nsp.nspname='public' and c.relkind='r' and c.relrowsecurity`, (r) => Number(r.n) === 8],
 ];
@@ -128,6 +134,7 @@ async function main() {
   await applySql(client, '001_schema.sql');
   await applySql(client, '002_seed.sql');
   await applySql(client, '003_storage.sql');
+  await applySql(client, '004_menu.sql');
 
   console.log('\nStorage:');
   await ensureBuckets();

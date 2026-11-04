@@ -167,7 +167,10 @@
 
   <div class="tabs" id="main-tabs" style="display:none">
     <div class="tab active" data-tab="food"><i class="fas fa-utensils"></i>Restaurant</div>
-    <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Bar</div>
+    <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Drinks</div>
+  </div>
+  <div id="price-note" style="display:none;text-align:center;font-size:0.78rem;color:var(--text-muted);padding:10px 16px 0">
+    All prices are inclusive of 15% VAT and 10% service charge.
   </div>
 
   <div id="food-section" class="menu-section active">
@@ -181,8 +184,8 @@
 
   <div id="bar-section" class="menu-section">
     <div class="section-header">
-      <h2>Bar Menu</h2>
-      <p>Craft cocktails & fine drinks</p>
+      <h2>Drinks Menu</h2>
+      <p>Coffee, tea, juices, smoothies & refreshers</p>
     </div>
     <div class="category-pills" id="bar-pills"></div>
     <div class="menu-grid" id="bar-grid"></div>
@@ -271,10 +274,12 @@
     if (!tableNumber) {
       document.getElementById('no-table').style.display = 'none';
       document.getElementById('main-tabs').style.display = 'flex';
+      document.getElementById('price-note').style.display = 'block';
       loadMenu();
     } else {
       document.getElementById('no-table').style.display = 'none';
       document.getElementById('main-tabs').style.display = 'flex';
+      document.getElementById('price-note').style.display = 'block';
       document.getElementById('table-badge').style.display = 'inline-block';
       document.getElementById('table-number').textContent = tableNumber;
       loadMenu();
@@ -483,7 +488,7 @@
       const container = document.getElementById('order-confirm-numbers');
       container.innerHTML = placedOrders.map(o => `
         <div class="order-num-item">
-          <span class="label">${o.type === 'bar' ? '🍸 Bar Order' : '🍽 Food Order'}</span>
+          <span class="label">${o.type === 'bar' ? '🥤 Drinks Order' : '🍽 Food Order'}</span>
           <span class="value">${o.order_number}</span>
         </div>
       `).join('');
@@ -595,7 +600,7 @@
                 <div style="height:100%;width:${pct}%;background:var(--primary);border-radius:3px;transition:width .5s"></div>
               </div>
               <div class="order-detail-row"><span>Table</span><span>${order.table_name}</span></div>
-              <div class="order-detail-row"><span>Type</span><span>${order.type === 'bar' ? 'Bar' : 'Restaurant'}</span></div>
+              <div class="order-detail-row"><span>Type</span><span>${order.type === 'bar' ? 'Drinks' : 'Restaurant'}</span></div>
               <div class="order-detail-row"><span>Placed</span><span>${new Date(order.created_at).toLocaleString()}</span></div>
               <div class="order-detail-row"><span>Total</span><span>ETB ${parseFloat(order.total).toFixed(2)}</span></div>
               ${order.special_notes ? `<div class="order-detail-row"><span>Notes</span><span>${order.special_notes}</span></div>` : ''}
