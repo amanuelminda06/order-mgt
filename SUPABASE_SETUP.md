@@ -296,21 +296,16 @@ on conflict (key) do nothing;
 
 | username | initial password |
 |---|---|
-| `admin` | `Admin123` |
-| `waiter1` | `Waiter123` |
-| `kitchen1` | `Kitchen123` |
-| `cashier1` | `Cashier123` |
+| `admin` | `[from ADMIN_INITIAL_PASSWORD]` |
+| `waiter1` | `[from WAITER_INITIAL_PASSWORD]` |
+| `kitchen1` | `[from KITCHEN_INITIAL_PASSWORD]` |
+| `cashier1` | `[from CASHIER_INITIAL_PASSWORD]` |
 
 All are 8+ characters, satisfying the password policy. Rotate them after
 first login (admin → Staff → change password).
 
 ```sql
-insert into users (username, password_hash, full_name, role, token_version) values
-  ('admin',    crypt('Admin123',   gen_salt('bf', 10)), 'Administrator', 'admin',    0),
-  ('waiter1',  crypt('Waiter123',  gen_salt('bf', 10)), 'Waiter One',    'waiter',   0),
-  ('kitchen1', crypt('Kitchen123', gen_salt('bf', 10)), 'Kitchen One',   'kitchen',  0),
-  ('cashier1', crypt('Cashier123', gen_salt('bf', 10)), 'Cashier One',   'cashier',  0)
-on conflict (username) do nothing;
+(no users seeded in SQL; run node scripts/seed-users.js)
 ```
 
 > `crypt()` needs `pgcrypto`:

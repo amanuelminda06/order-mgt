@@ -16,6 +16,4 @@ Restaurant and Bar Order Management System
 - **Bartender**: View and manage drink orders
 
 ## Default Login
-- Admin: admin / admin
-- Waiter: waiter / admin
-- Bartender: bartender / admin
+Run `node scripts/seed-users.js` after setup. Initial passwords come from `*_INITIAL_PASSWORD` in `.env`.

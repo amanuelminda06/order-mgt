@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "setup": "node scripts/db-setup.js",
+    "reset": "node scripts/db-reset.js",
+    "seed:users": "node scripts/seed-users.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

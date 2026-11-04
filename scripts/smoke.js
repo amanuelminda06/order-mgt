@@ -58,7 +58,7 @@ async function main() {
   let res = await fetch(`${base}/api/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'admin', password: 'Admin123' }),
+    body: JSON.stringify({ username: 'admin', password: process.env.ADMIN_INITIAL_PASSWORD }),
   });
   let login = await expect('POST /api/login (valid admin)', res, 200);
   const adminTok = login && login.token;
@@ -84,7 +84,7 @@ async function main() {
   res = await fetch(`${base}/api/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'waiter1', password: 'Waiter123' }),
+    body: JSON.stringify({ username: 'waiter1', password: process.env.WAITER_INITIAL_PASSWORD }),
   });
   const waiterLogin = await expect('POST /api/login (waiter)', res, 200);
   const waiterTok = waiterLogin.token;
