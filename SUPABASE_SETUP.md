@@ -272,15 +272,25 @@ insert into settings (key, value) values
 on conflict (key) do nothing;
 ```
 
-**4b. Staff users** — placeholder password, rotated on first login:
+**4b. Staff users** — initial passwords are the role name + `123`:
+
+| username | initial password |
+|---|---|
+| `admin` | `Admin123` |
+| `waiter1` | `Waiter123` |
+| `kitchen1` | `Kitchen123` |
+| `cashier1` | `Cashier123` |
+
+All are 8+ characters, satisfying the password policy. Rotate them after
+first login (admin → Staff → change password).
 
 ```sql
--- Replace 'CHANGE_ME_MIN_8_CHARS' before running.
 insert into users (username, password_hash, full_name, role, token_version) values
-  ('admin',     crypt('CHANGE_ME_MIN_8_CHARS', gen_salt('bf', 10)), 'Administrator', 'admin', 0),
-  ('waiter1',   crypt('CHANGE_ME_MIN_8_CHARS', gen_salt('bf', 10)), 'Waiter One',    'waiter', 0),
-  ('kitchen1',  crypt('CHANGE_ME_MIN_8_CHARS', gen_salt('bf', 10)), 'Kitchen One',   'kitchen', 0),
-  ('cashier1',  crypt('CHANGE_ME_MIN_8_CHARS', gen_salt('bf', 10)), 'Cashier One',   'cashier', 0);
+  ('admin',    crypt('Admin123',   gen_salt('bf', 10)), 'Administrator', 'admin',    0),
+  ('waiter1',  crypt('Waiter123',  gen_salt('bf', 10)), 'Waiter One',    'waiter',   0),
+  ('kitchen1', crypt('Kitchen123', gen_salt('bf', 10)), 'Kitchen One',   'kitchen',  0),
+  ('cashier1', crypt('Cashier123', gen_salt('bf', 10)), 'Cashier One',   'cashier',  0)
+on conflict (username) do nothing;
 ```
 
 > `crypt()` needs `pgcrypto`:

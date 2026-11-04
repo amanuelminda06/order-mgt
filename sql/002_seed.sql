@@ -26,13 +26,16 @@ insert into settings (key, value) values
 on conflict (key) do nothing;
 
 -- ── b. Staff users ───────────────────────────────────────────
--- PLACEHOLDER PASSWORD: CupcakeDelight_2026!
--- Rotate it on first login (admin -> Staff -> change password).
+-- INITIAL PASSWORDS (change after first login):
+--   admin    -> Admin123
+--   waiter1  -> Waiter123
+--   kitchen1 -> Kitchen123
+--   cashier1 -> Cashier123
 insert into users (username, password_hash, full_name, role, token_version) values
-  ('admin',    crypt('CupcakeDelight_2026!', gen_salt('bf', 10)), 'Administrator', 'admin',    0),
-  ('waiter1',  crypt('CupcakeDelight_2026!', gen_salt('bf', 10)), 'Waiter One',    'waiter',   0),
-  ('kitchen1', crypt('CupcakeDelight_2026!', gen_salt('bf', 10)), 'Kitchen One',   'kitchen',  0),
-  ('cashier1', crypt('CupcakeDelight_2026!', gen_salt('bf', 10)), 'Cashier One',   'cashier',  0)
+  ('admin',    crypt('Admin123', gen_salt('bf', 10)),    'Administrator', 'admin',    0),
+  ('waiter1',  crypt('Waiter123', gen_salt('bf', 10)),   'Waiter One',    'waiter',   0),
+  ('kitchen1', crypt('Kitchen123', gen_salt('bf', 10)),  'Kitchen One',   'kitchen',  0),
+  ('cashier1', crypt('Cashier123', gen_salt('bf', 10)),  'Cashier One',   'cashier',  0)
 on conflict (username) do nothing;
 
 -- ── c. 30 dine-in tables ─────────────────────────────────────
