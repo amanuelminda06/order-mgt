@@ -21,14 +21,13 @@ async function seedUsers() {
     if (!password) throw new Error('Missing ' + u.env);
     const hash = bcrypt.hashSync(password, 10);
     await client.query(
-      `insert into users (username, password_hash, full_name, role, active, token_version, must_change_password)
-       values ($1,$2,$3,$4,true,0,true)
+      `insert into users (username, password_hash, full_name, role, active, token_version)
+       values ($1,$2,$3,$4,true,0)
        on conflict (username) do update set
          password_hash = excluded.password_hash,
          full_name = excluded.full_name,
          role = excluded.role,
          active = true,
-         must_change_password = true,
          updated_at = now()`,
       [u.username, hash, u.fullName, u.role]
     );

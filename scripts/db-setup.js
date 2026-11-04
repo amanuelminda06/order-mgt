@@ -59,7 +59,6 @@ const CHECKS = [
   ['4 roles', "select count(distinct role)::int n from users", (r) => Number(r.n) === 4],
   ['no bartender role', "select count(*) n from pg_enum where enumlabel='bartender' and enumtypid=(select oid from pg_type where typname='user_role')", (r) => Number(r.n) === 0],
   ['4 seed users', 'select count(*) n from users', (r) => Number(r.n) === 4],
-  ['must_change_password default', "select column_default n from information_schema.columns where table_name='users' and column_name='must_change_password'", (r) => String(r.n).includes('true')],
   ['order_status has confirmed', "select count(*) n from pg_enum where enumlabel='confirmed' and enumtypid=(select oid from pg_type where typname='order_status')", (r) => Number(r.n) === 1],
   ['cancel reason check', "select count(*) n from pg_constraint where conrelid='orders'::regclass and contype='c' and pg_get_constraintdef(oid) like '%cancel_reason%'", (r) => Number(r.n) >= 1],
   ['15 menu categories', 'select count(*) n from menu_categories', (r) => Number(r.n) === 15],

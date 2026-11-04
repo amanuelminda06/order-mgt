@@ -29,11 +29,14 @@ create table if not exists users (
   role user_role not null,
   active boolean not null default true,
   token_version integer not null default 0,
-  must_change_password boolean not null default true,
   password_changed_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Trial deployments do not force a password change on first login. Drop the
+-- legacy flag if an earlier version of this schema created it.
+alter table users drop column if exists must_change_password;
 
 create table if not exists menu_categories (
   id bigserial primary key,
