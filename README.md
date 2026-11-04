@@ -1,4 +1,4 @@
-# Sunset Bistro & Lounge
+# Cupcake Delights
 
 Restaurant and Bar Order Management System
 

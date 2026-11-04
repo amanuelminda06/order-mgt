@@ -1,7 +1,7 @@
 {
-  "name": "sunset-bistro-bar",
+  "name": "cupcake-delights",
   "version": "1.0.0",
-  "description": "Sunset Bistro & Lounge - Restaurant and Bar Order Management System",
+  "description": "Cupcake Delights - Cafe & Bakery Order Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

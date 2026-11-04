@@ -26,6 +26,26 @@ JWT_SECRET=<random 32+ bytes>                  # for HMAC session tokens
 Never commit `.env`. The service-role key bypasses RLS — it must only ever
 live server-side.
 
+### Telegram bot
+
+The bot token is verified (`getMe` → `@Cupcakedelight_orders_bot`). To get
+the **chat id**:
+
+1. Open the bot in Telegram and press **Start**, or add it to your staff
+   group (it cannot read group messages unless it is an admin for some
+   group types).
+2. Run:
+
+```bash
+curl "https://api.telegram.org/bot<TOKEN>/getUpdates"
+```
+
+3. Copy `"chat":{"id":…}` into `TELEGRAM_CHAT_ID`. For a group this is a
+   negative number such as `-1001234567890`.
+
+Until `TELEGRAM_CHAT_ID` is set, order notifications are silently skipped
+(the feature is a no-op, never an error).
+
 ---
 
 ## 1. Create the schema

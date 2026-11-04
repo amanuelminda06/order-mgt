@@ -1,4 +1,4 @@
-# Migration Plan — Sunset Bistro → Cupcake Delight
+# Migration Plan — Cupcake Delights
 
 Small, separately reviewable steps. Each step must leave `node scripts/smoke.js`
 at **76/76** (or the diff must be an *intended* behaviour change, called out in

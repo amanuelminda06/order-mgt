@@ -14,7 +14,7 @@ const app = createApp();
 
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`Sunset Bistro & Lounge running on http://localhost:${PORT}`);
+    console.log(`Cupcake Delights running on http://localhost:${PORT}`);
     console.log(`Telegram: ${process.env.TELEGRAM_BOT_TOKEN ? 'Configured' : 'Not configured'}`);
   });
 }

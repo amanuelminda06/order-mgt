@@ -371,11 +371,11 @@ async function main() {
 
   res = await fetch(`${base}/admin`);
   const adminHtml = await expect('GET /admin serves HTML', res, 200, false);
-  check('admin.html is Sunset Bistro', () => assert.ok(adminHtml.includes('Sunset Bistro')));
+  check('admin.html is Cupcake Delights', () => assert.ok(adminHtml.includes('Cupcake Delights')));
 
   res = await fetch(`${base}/menu.html?table=1`);
   const menuHtml = await expect('GET /menu.html serves HTML', res, 200, false);
-  check('menu.html is Sunset Bistro', () => assert.ok(menuHtml.includes('Sunset Bistro')));
+  check('menu.html is Cupcake Delights', () => assert.ok(menuHtml.includes('Cupcake Delights')));
 
   res = await fetch(`${base}/staff`, { redirect: 'manual' });
   check('GET /staff redirects', () => assert.ok([301, 302, 307, 308].includes(res.status)));
