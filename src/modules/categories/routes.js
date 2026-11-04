@@ -7,10 +7,10 @@ const router = express.Router();
 
 /**
  * Map a Supabase category row to the legacy API shape:
- * { id, name, section }
+ * { id, name, section } where section is 'food' or 'bar' (legacy 'bar' for drinks).
  */
 function toCategoryRow(c) {
-  return { id: c.id, name: c.name, section: c.section };
+  return { id: c.id, name: c.name, section: c.section === 'drink' ? 'bar' : c.section };
 }
 
 router.get('/api/categories', async (req, res) => {
@@ -27,10 +27,11 @@ router.post('/api/categories', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { name, section } = req.body;
     if (!name || !section) return res.status(400).json({ error: 'Name and section required' });
-    if (!['food', 'drink'].includes(section)) return res.status(400).json({ error: 'Section must be food or drink' });
-    const existing = await select('menu_categories', { name, section }, 'id');
+    const dbSection = section === 'bar' ? 'drink' : section;
+    if (!['food', 'drink'].includes(dbSection)) return res.status(400).json({ error: 'Section must be food or drink' });
+    const existing = await select('menu_categories', { name, section: dbSection }, 'id');
     if (existing.length) return res.status(400).json({ error: 'Category already exists in this section' });
-    const created = await insert('menu_categories', { name, section, active: true });
+    const created = await insert('menu_categories', { name, section: dbSection, active: true });
     res.json({ success: true, id: created[0].id });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -42,12 +43,16 @@ router.put('/api/categories/:id', requireAuth, requireAdmin, async (req, res) =>
     const cat = await select('menu_categories', { id: req.params.id }, 'id');
     if (!cat.length) return res.status(404).json({ error: 'Category not found' });
     const { name, section } = req.body;
-    if (name !== undefined) {
-      if (section !== undefined && !['food', 'drink'].includes(section)) {
+    if (name !== undefined && section !== undefined) {
+      const dbSection = section === 'bar' ? 'drink' : section;
+      if (!['food', 'drink'].includes(dbSection)) {
         return res.status(400).json({ error: 'Section must be food or drink' });
       }
     }
-    await update('menu_categories', req.params.id, { name, section });
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (section !== undefined) updateData.section = section === 'bar' ? 'drink' : section;
+    await update('menu_categories', req.params.id, updateData);
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });

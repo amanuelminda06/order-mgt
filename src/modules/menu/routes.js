@@ -28,6 +28,7 @@ function toItemRow(item) {
     subcategory: cat.name || '',
     available: item.available === true,
     image: item.image_path || '',
+    sort_order: item.sort_order || 0,
   };
 }
 

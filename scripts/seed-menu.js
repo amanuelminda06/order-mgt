@@ -15,18 +15,20 @@ async function seed() {
 
   // ── Seed categories ──
   console.log(`  Found ${categories.length} categories in memory-store`);
-  for (const cat of categories) {
-    const existing = await select('menu_categories', { name: cat.name, section: cat.section }, 'id');
+  for (const [i, cat] of categories.entries()) {
+    const dbSection = cat.section === 'bar' ? 'drink' : cat.section;
+    const existing = await select('menu_categories', { name: cat.name, section: dbSection }, 'id');
     if (existing.length) {
       console.log(`    skip category '${cat.name}' (already exists)`);
       continue;
     }
     const created = await insert('menu_categories', {
       name: cat.name,
-      section: cat.section === 'bar' ? 'drink' : cat.section,
+      section: dbSection,
       active: true,
+      sort_order: i + 1,
     });
-    console.log(`    created category '${cat.name}' id=${created[0].id}`);
+    console.log(`    created category '${cat.name}' id=${created[0].id} sort_order=${i + 1}`);
   }
 
   // ── Build category name → id map ──
@@ -65,6 +67,7 @@ async function seed() {
       price: item.price,
       available: item.available !== false,
       image_path: item.image || '',
+      sort_order: item.id,
     });
     inserted++;
   }

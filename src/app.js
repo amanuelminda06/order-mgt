@@ -57,6 +57,7 @@ async function seedSupabaseIfEmpty() {
         price: item.price,
         available: item.available !== false,
         image_path: item.image || '',
+        sort_order: item.id,
       });
     }
     console.log('Supabase menu tables seeded.');
