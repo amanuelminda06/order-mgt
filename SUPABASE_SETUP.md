@@ -94,14 +94,9 @@ create table tables (
   updated_at   timestamptz not null default now()
 );
 
--- ── 5. Order number sequence (wraps 1001 → 9999 → 1001) ──────────
--- A plain Postgres SEQUENCE cannot wrap, so the counter is a row.
-create table order_number_seq (
-  id          integer primary key default 1 check (id = 1),
-  last_value  integer not null default 1000,   -- next call yields 1001
-  updated_at  timestamptz not null default now()
-);
-insert into order_number_seq (id, last_value) values (1, 1000);
+-- ── 5. Order number sequence (plain, starts at 1001) ─────────────
+-- A normal Postgres SEQUENCE: monotonically increasing, never wraps.
+create sequence order_number_seq start 1001 minvalue 1001;
 
 -- ── 6. Orders ────────────────────────────────────────────────────
 create type order_status as enum
@@ -109,9 +104,8 @@ create type order_status as enum
 
 create table orders (
   id            bigserial primary key,
-  -- Sequential, wraps at 9999 (decision 1a: duplicates accepted).
-  -- NOT unique on purpose. Tracker resolves to the newest match.
-  order_no      integer not null,
+  -- Sequential from 1001, never wraps, therefore unique.
+  order_no      integer not null unique,
   table_id      bigint not null references tables(id) on delete restrict,
   status        order_status not null default 'pending',
 
@@ -138,7 +132,7 @@ create table orders (
 );
 create index orders_table_idx  on orders (table_id);
 create index orders_status_idx on orders (status);
-create index orders_no_idx     on orders (order_no);   -- non-unique: wraps
+-- order_no: no extra index needed, the UNIQUE constraint indexes it
 
 -- ── 7. Order items (price/name snapshotted at order time) ────────
 create table order_items (
@@ -183,7 +177,7 @@ create table settings (
 - No `order_amendments` table — amendments were removed from the spec.
 - No `public_token` / `qr_token` on orders — customers track by `order_no`.
 - No `must_change_password` column — password changes are never forced.
-- `orders.order_no` is **not** unique because the counter wraps at 9999.
+- `orders.order_no` **is** unique: the sequence starts at 1001 and never wraps.
 
 ---
 
@@ -198,7 +192,8 @@ alter table orders           enable row level security;
 alter table order_items      enable row level security;
 alter table audit_log        enable row level security;
 alter table settings         enable row level security;
-alter table order_number_seq enable row level security;
+-- order_number_seq is a SEQUENCE, not a table: RLS does not apply to it.
+-- (Everything else above is a table and must have RLS enabled.)
 
 -- With the service-role key, RLS is bypassed server-side, so no policies
 -- are needed for the API. These two policies only matter if you later add
@@ -327,26 +322,20 @@ insert into menu_items (name, description, category_id, price) values
 
 ---
 
-## 5. Order number function (wraps 1001 → 9999)
+## 5. Order number generation (plain sequence from 1001)
 
 ```sql
-create or replace function next_order_no() returns integer
-language plpgsql as $$
-declare v integer;
-begin
-  update order_number_seq
-     set last_value = case when last_value >= 9999 then 1001 else last_value + 1 end,
-         updated_at = now()
-   where id = 1
-  returning last_value into v;
-  return v;
-end $$;
+create sequence order_number_seq start 1001 minvalue 1001;
 ```
 
-Because the counter wraps, `orders.order_no` **can repeat**. The public
-tracker must therefore select `... order by created_at desc limit 1`.
-(Decision **1a — simple wrap**: duplicates accepted; only `order_no` and
-`status` are ever exposed, so nothing sensitive leaks.)
+Nothing else is required — call it with `nextval('order_number_seq')` when
+creating an order. The sequence only ever increases, never wraps, so
+`orders.order_no` is **UNIQUE** and an old number can never be reused. The
+public tracker can therefore look the order up directly:
+
+```sql
+select order_no, status from orders where order_no = $1;
+```
 
 ---
 
@@ -383,8 +372,10 @@ $$;
 ```sql
 -- expect 30
 select count(*) from tables;
--- expect 1001
-select next_order_no();
+-- expect 1001 (first call consumes it; the next order gets 1002)
+select nextval('order_number_seq');
+-- order_no must be unique
+select conname from pg_constraint where conrelid='orders'::regclass and contype='u';
 -- expect 'ETB', 15, 'inclusive'
 select value from settings where key in ('currency_code','vat_rate','vat_mode');
 -- expect 4 roles, no bartender
@@ -403,9 +394,10 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 
 ## 8. Assumptions recorded
 
-1. **Order numbers wrap 1001 → 9999 → 1001** (decision *1a*). `order_no` is
-   therefore **not unique**; duplicates are accepted and the tracker returns
-   the newest match. No random suffix.
+1. **Order numbers start at 1001 and increase forever — no wrap-around.**
+   `orders.order_no` is therefore `UNIQUE`, an old number is never reused, and
+   the public tracker resolves a number to exactly one order. No random
+   suffix.
 2. **No `must_change_password`** — password changes are never forced. Admin
    can change any user's password; every user can change their own. Min 8
    characters. `password_changed_at` is retained for audit only.
@@ -449,10 +441,10 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 16. **Telegram stays optional** — no-op when `TELEGRAM_BOT_TOKEN` /
     `TELEGRAM_CHAT_ID` are unset — and messages become localized and use the
     configured currency (the legacy hardcoded `ETB` goes away with them).
-17. **`order_number_seq` is a row, not a `SEQUENCE`**, because a Postgres
-    sequence cannot wrap. It is updated inside `next_order_no()` under a row
-    lock, so concurrent orders cannot collide *within* a single pass of the
-    counter.
+17. **`order_number_seq` is a plain Postgres `SEQUENCE` starting at 1001** —
+    no wrap-around, so `order_no` is unique forever. Postgres sequences are
+    allocation-based (nextval is atomic), so concurrent orders cannot receive
+    the same number.
 18. **Audit scope**: every staff mutation (orders, status changes,
     cancellations, menu, categories, tables, users, passwords, settings,
     uploads) writes to `audit_log` with before/after JSON. Customer reads are
@@ -464,11 +456,11 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 
 - [ ] Project created, `.env` filled in
 - [ ] `001_schema.sql` run — no errors
-- [ ] RLS enabled on all 10 tables
+- [ ] RLS enabled on all 8 tables (the sequence needs none)
 - [ ] `pgcrypto` extension enabled
 - [ ] Three storage buckets created with policies
 - [ ] `002_seed.sql` run — settings, users, 30 tables, categories
-- [ ] `next_order_no()` created and returns 1001 on first call
+- [ ] `order_number_seq` created as a SEQUENCE starting at 1001
 - [ ] `calc_order_total()` created
 - [ ] Verification queries in §7 all return expected values
 - [ ] Placeholder admin password rotated
