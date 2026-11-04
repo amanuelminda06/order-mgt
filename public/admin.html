@@ -5,29 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Cupcake Delights</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--primary:#d4764e;--primary-dark:#b85a35;--dark:#1a0f0a;--dark2:#2c1810;--text:#1a0f0a;--text-muted:#8b7355;--bg:#faf6f1;--card:#ffffff;--border:#e8ddd0;--success:#27ae60;--error:#e74c3c;--warning:#f39c12;--bar:#2980b9;--font-serif:'Playfair Display',serif;--font-sans:'Inter',sans-serif;--radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+    :root{--brand-yellow:#F9E98A;--primary:#914930;--primary-dark:#5B382D;--accent:#E8B75C;--dark:#5B382D;--dark2:#5B382D;--text:#5B382D;--text-muted:rgba(91,56,45,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#914930;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(91,56,45,0.10)}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh}
     .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
     .login-box{background:var(--card);padding:40px;border-radius:var(--radius);border:1px solid var(--border);max-width:400px;width:100%;box-shadow:var(--shadow)}
-    .login-box h1{font-family:var(--font-serif);text-align:center;color:var(--primary);margin-bottom:24px;font-size:1.3rem}
+    .brand-logo{position:relative;overflow:hidden;width:78px;height:78px;border-radius:50%;background:var(--card);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;color:var(--primary)}
+    .brand-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .login-box h1{font-family:var(--font-hand);text-align:center;color:var(--primary);margin-bottom:24px;font-size:1.9rem;font-weight:400;line-height:1.2}
+    .login-box h1 span{display:block;font-family:var(--font-sans);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-top:4px}
     .login-box label{font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:4px}
     .login-box input{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;margin-bottom:16px;background:var(--bg);font-family:var(--font-sans)}
     .login-box input:focus{outline:none;border-color:var(--primary)}
     .btn{padding:12px 24px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-family:var(--font-sans);font-size:0.9rem;transition:all .2s}
-    .btn-primary{background:var(--primary);color:#fff;width:100%}
+    .btn-primary{background:var(--accent);color:var(--text);width:100%;font-weight:700}
     .btn-sm{padding:6px 14px;font-size:0.8rem}
     .btn-success{background:var(--success);color:#fff}
     .btn-danger{background:var(--error);color:#fff}
     .error-msg{color:var(--error);font-size:0.8rem;text-align:center;margin-top:8px;display:none}
     .admin{display:none}.admin.active{display:block}
-    .admin-header{background:var(--dark2);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .admin-header h2{font-family:var(--font-serif);font-size:1.1rem}
+    .admin-header{background:var(--dark2);color:var(--bg);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .admin-brand{display:flex;align-items:center;gap:10px}
+    .admin-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--card);flex-shrink:0}
+    .admin-header h2{font-family:var(--font-hand);font-size:1.35rem;font-weight:400;letter-spacing:0.5px}
     .admin-header .user-info{font-size:0.8rem;opacity:0.7}
-    .admin-tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:56px;z-index:99}
+    .admin-tabs{display:flex;overflow-x:auto;border-bottom:2px solid var(--accent);background:var(--brand-yellow);position:sticky;top:62px;z-index:99}
     .admin-tab{padding:14px 20px;font-size:0.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
     .admin-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
     .admin-tab i{margin-right:6px}
@@ -58,7 +63,7 @@
     .modal-actions{display:flex;gap:8px;margin-top:16px}
     .filter-pills{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
     .fpill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:0.8rem;cursor:pointer;transition:all .2s}
-    .fpill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .fpill.active{background:var(--accent);color:var(--text);border-color:var(--primary);font-weight:700}
     .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
     .qr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
     .qr-card img{max-width:150px;margin:8px auto}
@@ -86,10 +91,10 @@
     .cat-delete-btn{background:var(--error);color:#fff}
     .cat-add-row{display:flex;gap:8px;margin-top:8px}
     .cat-add-row input{flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:var(--font-sans)}
-    .cat-add-row button{padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.85rem;white-space:nowrap}
+    .cat-add-row button{padding:8px 16px;background:var(--accent);color:var(--text);border:none;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:0.85rem;white-space:nowrap}
     .filter-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
     .filter-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text-muted);font-size:0.8rem;cursor:pointer;white-space:nowrap;transition:all .2s}
-    .filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .filter-btn.active{background:var(--accent);color:var(--text);border-color:var(--primary);font-weight:700}
     .orders-grid{display:grid;gap:12px}
     .order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
     .order-card.status-pending{border-left-color:var(--warning)}
@@ -102,7 +107,7 @@
     .order-card .order-items{margin:10px 0;font-size:0.85rem;list-style:none;padding:0}
     .order-card .order-items li{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
     .order-card .order-items li:last-child{border:none}
-    .order-card .order-notes{background:rgba(243,156,18,0.1);border:1px solid rgba(243,156,18,0.3);padding:8px;border-radius:var(--radius-sm);font-size:0.8rem;color:#8a6d3b;margin:8px 0}
+    .order-card .order-notes{background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);padding:8px;border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text);margin:8px 0}
     .order-card .order-footer{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
     .order-card .order-total{font-weight:700;color:var(--primary);font-size:1rem}
     @media(min-width:600px){.orders-grid{grid-template-columns:1fr 1fr}}
@@ -112,7 +117,8 @@
 <body>
   <div id="login-page" class="login-page">
     <div class="login-box">
-      <h1><i class="fas fa-utensils"></i> Cupcake Delights<br>Admin Panel</h1>
+      <div class="brand-logo"><i class="fas fa-utensils"></i><img src="/pics/cupcake%20logo2.jpg" alt="Cupcake Delights logo" onerror="this.remove()"></div>
+      <h1>Cupcake Delights<span>Admin Panel</span></h1>
       <form id="login-form">
         <label>Username</label><input type="text" id="username" required>
         <label>Password</label><input type="password" id="password" required>
@@ -124,7 +130,10 @@
 
   <div id="admin" class="admin">
     <div class="admin-header">
-      <h2 id="admin-header-title">Cupcake Delights Admin</h2>
+      <div class="admin-brand">
+        <img class="admin-logo" src="/pics/cupcake%20logo2.jpg" alt="Cupcake Delights logo" onerror="this.style.display='none'">
+        <h2 id="admin-header-title">Cupcake Delights Admin</h2>
+      </div>
       <div style="display:flex;align-items:center;gap:12px">
         <span class="user-info" id="admin-user"></span>
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
@@ -444,7 +453,7 @@
         const items=o.items.map(i=>`<li><span>${i.quantity}x ${i.name}</span><span>${i.notes?'📝 '+i.notes:''}</span></li>`).join('');
         const orderAmendments=allAmendments.filter(a=>a.order_id===o.id);
         const amendHtml=orderAmendments.map(a=>`
-          <div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:var(--radius-sm);padding:10px;margin:8px 0;font-size:0.82rem">
+          <div style="background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);border-radius:var(--radius-sm);padding:10px;margin:8px 0;font-size:0.82rem">
             <i class="fas fa-exclamation-triangle" style="color:var(--warning);margin-right:4px"></i>
             <strong style="text-transform:uppercase;color:var(--error)">${a.type}</strong> request: "${a.message}"
             <div style="display:flex;gap:6px;margin-top:8px">

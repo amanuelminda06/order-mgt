@@ -269,7 +269,7 @@ paths to signed/public URLs at read time.
 
 Run `sql/002_seed.sql`.
 
-**4a. Settings (placeholders until real content arrives)**
+**4a. Settings (email still pending)**
 
 ```sql
 insert into settings (key, value) values
@@ -277,8 +277,9 @@ insert into settings (key, value) values
   ('brand_name_am',         '"ኩፕኬክ ደላይት"'),
   ('tagline',               '"Freshly baked, every day"'),
   ('tagline_am',            '"በየቀኑ አዲስ የተጋገረ"'),
-  ('address',               '"[PLACEHOLDER — real address pending]"'),
-  ('phone',                 '"[PLACEHOLDER]"'),
+  ('address',               '"Bole Medihanialem, Robel Plaza, Ground Floor"'),
+  ('phone',                 '"+251 978 020 270"'),
+  ('phone_alt',             '"+251 91 112 1119"'),
   ('email',                 '"[PLACEHOLDER]"'),
   ('currency_code',         '"ETB"'),
   ('currency_symbol',       '"ETB"'),
@@ -301,8 +302,9 @@ on conflict (key) do nothing;
 | `kitchen1` | `[from KITCHEN_INITIAL_PASSWORD]` |
 | `cashier1` | `[from CASHIER_INITIAL_PASSWORD]` |
 
-All are 8+ characters, satisfying the password policy. Rotate them after
-first login (admin → Staff → change password).
+All are 8+ characters, satisfying the password policy. This trial does not
+force a password change on first login; rotate any credential only if you
+want to.
 
 ```sql
 (no users seeded in SQL; run node scripts/seed-users.js)
@@ -459,11 +461,10 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 12. **Images** are uploaded to Supabase Storage and stored as `image_path`
     (bucket-relative), never as a full URL. Limits: logo 2 MB, hero/menu 5
     MB, png/jpg/svg/webp only.
-13. **Menu is real; brand assets are placeholder** — the 15-section /
-    114-item menu is seeded from `sql/004_menu.sql`. Logo, hero, address,
-    phone and email still arrive later and are replaced through the admin
-    upload/settings screens; remaining placeholders are clearly marked
-    `[PLACEHOLDER]`.
+13. **Menu is real; email is the only placeholder left** — the 15-section /
+    114-item menu is seeded from `sql/004_menu.sql`. Address and phones are
+    seeded with the real details; logo and hero are served from
+    `public/pics/`. Email is still marked `[PLACEHOLDER]` until supplied.
 14. **Service charge** — menu prices are inclusive of 15% VAT **and 10%
     service charge**, but only VAT is modelled in the schema today. The
     10% service charge is added in the money step (Step 8 of
@@ -500,4 +501,4 @@ Then, in the app: log in as admin → **Tables & QR** should show 30 cards
 - [ ] `order_number_seq` created as a SEQUENCE starting at 1001
 - [ ] `calc_order_total()` created
 - [ ] Verification queries in §7 all return expected values
-- [ ] Placeholder admin password rotated
+- [ ] (Optional) Placeholder admin password rotated

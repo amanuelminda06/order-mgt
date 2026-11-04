@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#F9E98A">
   <title>Cupcake Delights</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--primary:#d4764e;--primary-dark:#b85a35;--dark:#1a0f0a;--dark2:#2c1810;--dark3:#5c3d2e;--text:#1a0f0a;--text-muted:#8b7355;--bg:#faf6f1;--card:#ffffff;--border:#e8ddd0;--success:#27ae60;--error:#e74c3c;--warning:#f39c12;--bar:#2980b9;--font-serif:'Playfair Display',serif;--font-sans:'Inter',sans-serif;--radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+    :root{--brand-yellow:#F9E98A;--primary:#914930;--primary-dark:#5B382D;--dark:#5B382D;--dark2:#914930;--dark3:#E8B75C;--text:#5B382D;--text-muted:rgba(91,56,45,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--accent:#E8B75C;--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#5B382D;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(91,56,45,0.10)}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding-bottom:80px}
 
-    .header{background:linear-gradient(135deg,var(--dark2),var(--dark));padding:24px 16px;text-align:center;color:#fff;position:sticky;top:0;z-index:100}
-    .header-logo{width:60px;height:60px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;color:#fff}
-    .header h1{font-family:var(--font-serif);font-size:1.4rem;color:#fff;margin-bottom:2px}
-    .header p{font-size:0.8rem;color:rgba(255,255,255,0.7)}
-    .table-badge{background:var(--primary);color:#fff;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;display:inline-block;margin-top:8px}
+    .header{background:linear-gradient(135deg,rgba(91,56,45,0.88),rgba(145,73,48,0.78)),url('/pics/cupcake%20hero.jpg') center/cover no-repeat,var(--dark);padding:24px 16px;text-align:center;color:#fff;position:sticky;top:0;z-index:100}
+    .header-logo{position:relative;overflow:hidden;width:64px;height:64px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:26px;color:var(--primary)}
+    .header-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .header h1{font-family:var(--font-hand);font-size:1.8rem;letter-spacing:0.5px;color:var(--bg);margin-bottom:2px}
+    .header p{font-size:0.82rem;color:rgba(255,253,245,0.85)}
+    .table-badge{background:var(--accent);color:var(--text);padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:700;display:inline-block;margin-top:8px}
 
-    .tabs{display:flex;position:sticky;top:110px;z-index:99;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto}
-    .tab{flex:1;padding:14px 8px;text-align:center;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);transition:all .2s;white-space:nowrap}
-    .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .tabs{display:flex;position:sticky;top:0;z-index:99;background:var(--brand-yellow);border-bottom:2px solid var(--accent);overflow-x:auto}
+    .tab{flex:1;padding:14px 8px;text-align:center;font-weight:700;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);transition:all .2s;white-space:nowrap}
+    .tab.active{color:var(--primary);border-bottom-color:var(--primary);background:rgba(255,253,245,0.55)}
     .tab i{margin-right:6px}
 
     .menu-section{padding:16px;display:none}
@@ -41,7 +43,7 @@
     .menu-card:hover{transform:translateY(-2px)}
     .menu-card-img{width:100px;min-height:100px;background:var(--bg);object-fit:cover;flex-shrink:0}
     .menu-card-body{padding:12px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
-    .menu-card-body h4{font-family:var(--font-serif);font-size:0.95rem;margin-bottom:4px}
+    .menu-card-body h4{font-family:var(--font-sans);font-weight:700;font-size:0.95rem;margin-bottom:4px}
     .menu-card-body p{font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .menu-card-footer{display:flex;align-items:center;justify-content:space-between}
     .menu-price{font-weight:700;color:var(--primary);font-size:1rem}
@@ -152,14 +154,21 @@
     .order-confirm-numbers .order-num-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.9rem}
     .order-confirm-numbers .order-num-item .label{color:var(--text-muted)}
     .order-confirm-numbers .order-num-item .value{font-weight:700;color:var(--primary);font-size:1rem}
-    .order-confirm-panel .track-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;background:rgba(212,118,78,0.08);padding:10px;border-radius:var(--radius-sm)}
+    .order-confirm-panel .track-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;background:rgba(145,73,48,0.08);padding:10px;border-radius:var(--radius-sm)}
     .order-confirm-panel .track-hint i{color:var(--primary);margin-right:4px}
     .order-confirm-panel .confirm-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.95rem}
+
+    .site-footer{background:var(--text);color:var(--bg);text-align:center;padding:28px 16px;margin-top:28px;font-size:0.85rem}
+    .site-footer .footer-brand{font-family:var(--font-hand);font-size:1.5rem;color:var(--accent);margin-bottom:8px}
+    .site-footer p{margin-bottom:6px;color:rgba(255,253,245,0.88)}
+    .site-footer i{color:var(--accent);margin-right:6px}
+    .site-footer a{color:var(--accent);text-decoration:none;font-weight:700}
+    .site-footer .footer-phones{margin-top:10px}
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="header-logo"><i class="fas fa-utensils"></i></div>
+    <div class="header-logo"><i class="fas fa-utensils"></i><img src="/pics/cupcake%20logo2.jpg" alt="Cupcake Delights logo" onerror="this.remove()"></div>
     <h1 id="restaurant-name">Cupcake Delights</h1>
     <p id="restaurant-tagline">Freshly baked, every day</p>
     <div class="table-badge" id="table-badge" style="display:none"><i class="fas fa-chair"></i> Table <span id="table-number"></span></div>
@@ -261,6 +270,14 @@
     </div>
   </div>
 
+  <footer class="site-footer">
+    <p class="footer-brand">Cupcake Delights</p>
+    <p><i class="fas fa-map-marker-alt"></i>Bole Medihanialem, Robel Plaza, Ground Floor</p>
+    <p class="footer-phones"><i class="fas fa-phone"></i>Call to pre-order yours:<br>
+      <a href="tel:+251978020270">+251 978 020 270</a> &nbsp;|&nbsp; <a href="tel:+251911121119">+251 91 112 1119</a>
+    </p>
+  </footer>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const tableNumber = params.get('table');
@@ -293,6 +310,15 @@
         document.getElementById(tab.dataset.tab + '-section').classList.add('active');
       });
     });
+
+    // Keep the sticky menu tabs directly below the sticky header.
+    function syncTabsTop(){
+      const header = document.querySelector('.header');
+      const tabs = document.getElementById('main-tabs');
+      if (header && tabs) tabs.style.top = header.offsetHeight + 'px';
+    }
+    window.addEventListener('resize', syncTabsTop);
+    syncTabsTop();
 
     let foodCategories = [];
     let barCategories = [];
@@ -511,7 +537,8 @@
       try {
         const res = await fetch('/api/settings');
         const s = await res.json();
-        if (s.restaurant_name) document.getElementById('restaurant-name').textContent = s.restaurant_name;
+        const brandName = s.restaurant_name || s.brand_name;
+        if (brandName) document.getElementById('restaurant-name').textContent = brandName;
         if (s.tagline) document.getElementById('restaurant-tagline').textContent = s.tagline;
       } catch(e) {}
     }

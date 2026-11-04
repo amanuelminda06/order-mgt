@@ -215,13 +215,14 @@ const orders = [];
 const amendments = [];
 
 // ── Settings ──────────────────────────────────────────────
-// Mirrors sql/002_seed.sql. Address/phone/email are placeholders until
-// the real details arrive (replaced through the admin settings panel).
+// Mirrors sql/002_seed.sql. Email is still a placeholder until it arrives
+// (replaced through the admin settings panel).
 const settings = {
   restaurant_name: 'Cupcake Delights',
   tagline: 'Freshly baked, every day',
-  phone: '[PLACEHOLDER]',
-  address: '[PLACEHOLDER - real address pending]',
+  phone: '+251 978 020 270',
+  phone_alt: '+251 91 112 1119',
+  address: 'Bole Medihanialem, Robel Plaza, Ground Floor',
   email: '[PLACEHOLDER]',
 };
 
