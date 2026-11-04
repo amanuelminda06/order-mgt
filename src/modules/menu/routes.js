@@ -35,9 +35,10 @@ function toItemRow(item) {
 router.get('/api/menu', async (req, res) => {
   try {
     let rows = await select('menu_items', {}, '*, menu_categories(name, section)');
-    if (req.query.category) rows = rows.filter((i) => i.category === req.query.category);
-    if (req.query.available === 'true') rows = rows.filter((i) => i.available);
-    res.json(rows.map(toItemRow));
+    let items = rows.map(toItemRow);
+    if (req.query.category) items = items.filter((i) => i.category === req.query.category);
+    if (req.query.available === 'true') items = items.filter((i) => i.available);
+    res.json(items);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

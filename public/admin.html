@@ -257,7 +257,7 @@
   </div>
 
   <script>
-    let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffFilter='all', staffRefreshInterval;
+    let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffFilter='all', staffRefreshInterval, allCategories=[];
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -352,7 +352,8 @@
       editId=item?item.id:null;
       editingImage=item?.image||'';
       document.getElementById('modal-title').textContent=item?'Edit Item':'Add Item';
-      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Photo</label><img id="m-img-preview" class="img-preview" alt="" src="${editingImage}" style="${editingImage?'':'display:none'}"><input type="file" id="m-img-file" accept="image/*" onchange="previewMenuItemImage(this)"><p class="img-hint" id="m-img-status">JPG, PNG, WebP or GIF · up to 5 MB${editingImage?'':' · no photo yet'}</p>`;
+      const subOpts = allCategories.map(c => `<option value="${c.name}" ${item?.subcategory===c.name?'selected':''}>${c.name}</option>`).join('');
+      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><select id="m-sub">${subOpts}</select><label>Photo</label><img id="m-img-preview" class="img-preview" alt="" src="${editingImage}" style="${editingImage?'':'display:none'}"><input type="file" id="m-img-file" accept="image/*" onchange="previewMenuItemImage(this)"><p class="img-hint" id="m-img-status">JPG, PNG, WebP or GIF · up to 5 MB${editingImage?'':' · no photo yet'}</p>`;
       document.getElementById('modal-save').onclick=saveMenu;
       document.getElementById('modal-overlay').classList.add('active');
     }
@@ -392,10 +393,11 @@
     }
 
     // CATEGORIES
-    async function loadCategories(){
-      const res=await fetch('/api/categories');
-      const cats=await res.json();
-      const foodCats=cats.filter(c=>c.section==='food');
+async function loadCategories(){
+  const res=await fetch('/api/categories');
+  const cats=await res.json();
+  allCategories=cats;
+  const foodCats=cats.filter(c=>c.section==='food');
       const barCats=cats.filter(c=>c.section==='bar');
       document.getElementById('food-cat-list').innerHTML=foodCats.map(c=>`
         <li>
