@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Sunset Bistro & Lounge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--primary:#d4764e;--primary-dark:#b85a35;--dark:#1a0f0a;--dark2:#2c1810;--dark3:#5c3d2e;--text:#1a0f0a;--text-muted:#8b7355;--bg:#faf6f1;--card:#ffffff;--border:#e8ddd0;--success:#27ae60;--error:#e74c3c;--warning:#f39c12;--bar:#2980b9;--font-serif:'Playfair Display',serif;--font-sans:'Inter',sans-serif;--radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding-bottom:80px}
+
+    .header{background:linear-gradient(135deg,var(--dark2),var(--dark));padding:24px 16px;text-align:center;color:#fff;position:sticky;top:0;z-index:100}
+    .header-logo{width:60px;height:60px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;color:#fff}
+    .header h1{font-family:var(--font-serif);font-size:1.4rem;color:#fff;margin-bottom:2px}
+    .header p{font-size:0.8rem;color:rgba(255,255,255,0.7)}
+    .table-badge{background:var(--primary);color:#fff;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;display:inline-block;margin-top:8px}
+
+    .tabs{display:flex;position:sticky;top:110px;z-index:99;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto}
+    .tab{flex:1;padding:14px 8px;text-align:center;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);transition:all .2s;white-space:nowrap}
+    .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .tab i{margin-right:6px}
+
+    .menu-section{padding:16px;display:none}
+    .menu-section.active{display:block}
+    .section-header{margin-bottom:16px}
+    .section-header h2{font-family:var(--font-serif);font-size:1.2rem;color:var(--dark2)}
+    .section-header p{font-size:0.8rem;color:var(--text-muted)}
+
+    .category-pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px}
+    .pill{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text-muted);font-size:0.8rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+    .pill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+    .menu-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:480px){.menu-grid{grid-template-columns:1fr 1fr}}
+
+    .menu-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:flex;box-shadow:var(--shadow);transition:transform .2s}
+    .menu-card:hover{transform:translateY(-2px)}
+    .menu-card-img{width:100px;min-height:100px;background:var(--bg);object-fit:cover;flex-shrink:0}
+    .menu-card-body{padding:12px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+    .menu-card-body h4{font-family:var(--font-serif);font-size:0.95rem;margin-bottom:4px}
+    .menu-card-body p{font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .menu-card-footer{display:flex;align-items:center;justify-content:space-between}
+    .menu-price{font-weight:700;color:var(--primary);font-size:1rem}
+    .unavailable{opacity:0.5;pointer-events:none}
+    .unavailable-badge{background:var(--error);color:#fff;padding:2px 8px;border-radius:10px;font-size:0.65rem;font-weight:600}
+
+    .qty-control{display:flex;align-items:center;gap:8px}
+    .qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .qty-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .qty-val{font-weight:600;font-size:0.9rem;min-width:20px;text-align:center}
+
+    .cart-bar{position:fixed;bottom:0;left:0;right:0;background:var(--dark);color:#fff;padding:12px 16px;display:none;align-items:center;justify-content:space-between;z-index:200;border-top:2px solid var(--primary)}
+    .cart-bar.visible{display:flex}
+    .cart-bar-left{display:flex;align-items:center;gap:10px}
+    .cart-count{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700}
+    .cart-bar .btn{background:var(--primary);color:#fff;padding:10px 24px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.9rem}
+
+    .cart-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);display:none;align-items:flex-end;justify-content:center}
+    .cart-modal.active{display:flex}
+    .cart-panel{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px 16px}
+    .cart-panel h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--dark2)}
+    .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+    .cart-item-info{flex:1}
+    .cart-item-info h5{font-size:0.9rem;margin-bottom:2px}
+    .cart-item-info p{font-size:0.75rem;color:var(--text-muted)}
+    .cart-item-price{font-weight:600;color:var(--primary);margin-right:12px}
+    .cart-item-remove{background:none;border:none;color:var(--error);cursor:pointer;font-size:0.8rem}
+    .cart-total{display:flex;justify-content:space-between;padding:16px 0;font-weight:700;font-size:1.1rem;border-top:2px solid var(--border);margin-top:8px}
+    .cart-actions{display:flex;gap:8px;margin-top:16px}
+    .cart-actions .btn{flex:1;padding:14px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.95rem}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border)!important}
+    .notes-input{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:0.85rem;margin-top:12px;resize:none}
+
+    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 24px;border-radius:var(--radius-sm);font-size:0.9rem;font-weight:500;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none}
+    .toast.show{opacity:1}
+    .toast.error{background:var(--error)}
+
+    .no-table{text-align:center;padding:60px 20px}
+    .no-table i{font-size:3rem;color:var(--primary);margin-bottom:16px}
+    .no-table h2{font-family:var(--font-serif);margin-bottom:8px}
+    .no-table p{color:var(--text-muted);font-size:0.9rem}
+
+    .track-section{padding:16px;display:none}
+    .track-section.active{display:block}
+    .track-lookup{display:flex;gap:8px;margin-bottom:16px}
+    .track-lookup input{flex:1;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.95rem;font-family:var(--font-sans)}
+    .track-lookup button{padding:12px 20px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer}
+    .track-empty{text-align:center;padding:40px;color:var(--text-muted)}
+    .track-empty i{font-size:2rem;margin-bottom:8px;color:var(--primary)}
+
+    .order-status-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px}
+    .order-status-card .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .order-status-card .order-num{font-family:var(--font-serif);font-size:1.1rem;font-weight:700}
+    .status-badge{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;color:#fff}
+    .status-pending{background:var(--warning)}
+    .status-preparing{background:var(--bar)}
+    .status-ready{background:var(--success)}
+    .status-completed{background:#666}
+    .status-cancelled{background:var(--error)}
+
+    .order-detail-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.85rem;color:var(--text-muted)}
+    .order-detail-row span:last-child{font-weight:500;color:var(--text)}
+    .order-items-list{margin:12px 0;padding:12px;background:var(--bg);border-radius:var(--radius-sm)}
+    .order-items-list h5{font-size:0.8rem;color:var(--text-muted);margin-bottom:8px}
+    .order-item-row{display:flex;justify-content:space-between;padding:4px 0;font-size:0.85rem}
+
+    .amend-actions{display:flex;gap:8px;margin-top:12px}
+    .amend-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;font-weight:600;font-size:0.85rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+    .amend-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .amend-btn.cancel-btn{color:var(--error)}
+    .amend-btn.cancel-btn:hover{border-color:var(--error)}
+    .amend-btn.amend-btn-main{color:var(--warning)}
+    .amend-btn.amend-btn-main:hover{border-color:var(--warning)}
+
+    .pending-amend{background:#fff3e0;border:1px solid #ffe0b2;border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:0.82rem}
+    .pending-amend i{color:var(--warning);margin-right:4px}
+
+    .amend-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center}
+    .amend-modal.active{display:flex}
+    .amend-panel{background:var(--card);border-radius:var(--radius);width:90%;max-width:400px;padding:24px}
+    .amend-panel h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--dark2)}
+    .amend-type-select{display:flex;gap:8px;margin-bottom:12px}
+    .amend-type-opt{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all .2s}
+    .amend-type-opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .amend-panel textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:0.85rem;resize:none;min-height:80px}
+    .amend-panel .amend-panel-actions{display:flex;gap:8px;margin-top:16px}
+    .amend-panel .amend-panel-actions button{flex:1;padding:12px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer}
+
+    .track-fab{position:fixed;bottom:90px;right:16px;z-index:150;background:var(--dark);color:#fff;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:none;align-items:center;justify-content:center;font-size:1.2rem;transition:transform .2s}
+    .track-fab:hover{transform:scale(1.1)}
+    .track-fab.visible{display:flex}
+    .track-fab-badge{position:absolute;top:-2px;right:-2px;background:var(--success);color:#fff;font-size:0.6rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--dark)}
+
+    .track-sheet{position:fixed;inset:0;z-index:350;background:rgba(0,0,0,0.5);display:none;align-items:flex-end;justify-content:center}
+    .track-sheet.active{display:flex}
+    .track-sheet-panel{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px 16px}
+    .track-sheet-panel h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--dark2);display:flex;align-items:center;justify-content:space-between}
+    .track-sheet-panel h3 button{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:4px}
+
+    .order-confirm-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center}
+    .order-confirm-modal.active{display:flex}
+    .order-confirm-panel{background:var(--card);border-radius:var(--radius);padding:32px 24px;max-width:400px;width:90%;text-align:center}
+    .order-confirm-panel .check-icon{width:60px;height:60px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:#fff}
+    .order-confirm-panel h3{font-family:var(--font-serif);color:var(--dark2);margin-bottom:8px}
+    .order-confirm-panel p{color:var(--text-muted);font-size:0.85rem;margin-bottom:16px}
+    .order-confirm-numbers{background:var(--bg);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px}
+    .order-confirm-numbers .order-num-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.9rem}
+    .order-confirm-numbers .order-num-item .label{color:var(--text-muted)}
+    .order-confirm-numbers .order-num-item .value{font-weight:700;color:var(--primary);font-size:1rem}
+    .order-confirm-panel .track-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;background:rgba(212,118,78,0.08);padding:10px;border-radius:var(--radius-sm)}
+    .order-confirm-panel .track-hint i{color:var(--primary);margin-right:4px}
+    .order-confirm-panel .confirm-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.95rem}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-logo"><i class="fas fa-utensils"></i></div>
+    <h1 id="restaurant-name">Sunset Bistro & Lounge</h1>
+    <p id="restaurant-tagline">Where Every Meal is a Sunset Moment</p>
+    <div class="table-badge" id="table-badge" style="display:none"><i class="fas fa-chair"></i> Table <span id="table-number"></span></div>
+  </div>
+
+  <div class="tabs" id="main-tabs" style="display:none">
+    <div class="tab active" data-tab="food"><i class="fas fa-utensils"></i>Restaurant</div>
+    <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Bar</div>
+  </div>
+
+  <div id="food-section" class="menu-section active">
+    <div class="section-header">
+      <h2>Restaurant Menu</h2>
+      <p>Fresh dishes crafted with love</p>
+    </div>
+    <div class="category-pills" id="food-pills"></div>
+    <div class="menu-grid" id="food-grid"></div>
+  </div>
+
+  <div id="bar-section" class="menu-section">
+    <div class="section-header">
+      <h2>Bar Menu</h2>
+      <p>Craft cocktails & fine drinks</p>
+    </div>
+    <div class="category-pills" id="bar-pills"></div>
+    <div class="menu-grid" id="bar-grid"></div>
+  </div>
+
+  <div id="no-table" class="no-table">
+    <i class="fas fa-qrcode"></i>
+    <h2>Scan a Table QR Code</h2>
+    <p>Please scan the QR code on your table to start ordering.</p>
+  </div>
+
+  <div class="cart-bar" id="cart-bar">
+    <div class="cart-bar-left">
+      <div class="cart-count" id="cart-count">0</div>
+      <span>Your Order</span>
+    </div>
+    <button class="btn" onclick="openCart()">View Cart</button>
+  </div>
+
+  <div class="cart-modal" id="cart-modal">
+    <div class="cart-panel">
+      <h3>Your Order</h3>
+      <div id="cart-items"></div>
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cart-total-val">ETB 0.00</span>
+      </div>
+      <textarea class="notes-input" id="order-notes" placeholder="Special notes (allergies, preferences...)"></textarea>
+      <div class="cart-actions">
+        <button class="btn btn-secondary" onclick="closeCart()">Cancel</button>
+        <button class="btn btn-primary" onclick="placeOrder()">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="amend-modal" id="amend-modal">
+    <div class="amend-panel">
+      <h3 id="amend-title">Request Change</h3>
+      <div class="amend-type-select">
+        <div class="amend-type-opt active" data-type="amend" onclick="selectAmendType('amend',this)"><i class="fas fa-edit"></i> Amend Order</div>
+        <div class="amend-type-opt" data-type="cancel" onclick="selectAmendType('cancel',this)"><i class="fas fa-times"></i> Cancel Order</div>
+      </div>
+      <textarea id="amend-message" placeholder="Describe your requested change..."></textarea>
+      <div class="amend-panel-actions">
+        <button class="btn btn-secondary" onclick="closeAmendModal()" style="background:var(--bg);color:var(--text)">Back</button>
+        <button class="btn btn-primary" style="background:var(--primary);color:#fff" onclick="submitAmendment()">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="order-confirm-modal" id="order-confirm-modal">
+    <div class="order-confirm-panel">
+      <div class="check-icon"><i class="fas fa-check"></i></div>
+      <h3>Order Placed!</h3>
+      <p>Your order has been sent to the kitchen.</p>
+      <div class="order-confirm-numbers" id="order-confirm-numbers"></div>
+      <div class="track-hint"><i class="fas fa-info-circle"></i> Tap the <strong>track button</strong> at the bottom right to check your order status.</div>
+      <button class="confirm-btn" onclick="closeOrderConfirm()">Got It</button>
+    </div>
+  </div>
+
+  <button class="track-fab" id="track-fab" onclick="openTrackSheet()">
+    <i class="fas fa-clipboard-list"></i>
+    <span class="track-fab-badge" id="track-fab-badge">1</span>
+  </button>
+
+  <div class="track-sheet" id="track-sheet">
+    <div class="track-sheet-panel">
+      <h3><span>My Order</span> <button onclick="closeTrackSheet()"><i class="fas fa-times"></i></button></h3>
+      <div id="track-sheet-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tableNumber = params.get('table');
+    let cart = [];
+    let foodItems = [];
+    let barItems = [];
+    let currentFoodCategory = 'all';
+    let currentBarCategory = 'all';
+    let trackRefreshInterval = null;
+
+    if (!tableNumber) {
+      document.getElementById('no-table').style.display = 'none';
+      document.getElementById('main-tabs').style.display = 'flex';
+      loadMenu();
+    } else {
+      document.getElementById('no-table').style.display = 'none';
+      document.getElementById('main-tabs').style.display = 'flex';
+      document.getElementById('table-badge').style.display = 'inline-block';
+      document.getElementById('table-number').textContent = tableNumber;
+      loadMenu();
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + '-section').classList.add('active');
+      });
+    });
+
+    let foodCategories = [];
+    let barCategories = [];
+
+    async function loadMenu() {
+      const [menuRes, catRes] = await Promise.all([
+        fetch('/api/menu?available=true'),
+        fetch('/api/categories')
+      ]);
+      const items = await menuRes.json();
+      const cats = await catRes.json();
+      foodItems = items.filter(i => i.category === 'food');
+      barItems = items.filter(i => i.category === 'bar');
+      foodCategories = cats.filter(c => c.section === 'food');
+      barCategories = cats.filter(c => c.section === 'bar');
+      renderFoodPills();
+      renderBarPills();
+      renderFoodGrid();
+      renderBarGrid();
+    }
+
+    function renderFoodPills() {
+      const container = document.getElementById('food-pills');
+      container.innerHTML = `<div class="pill active" data-cat="all" onclick="filterFood('all',this)">All</div>` +
+        foodCategories.map(c => `<div class="pill" data-cat="${c.name}" onclick="filterFood('${c.name}',this)">${c.name}</div>`).join('');
+    }
+
+    function renderBarPills() {
+      const container = document.getElementById('bar-pills');
+      container.innerHTML = `<div class="pill active" data-cat="all" onclick="filterBar('all',this)">All</div>` +
+        barCategories.map(c => `<div class="pill" data-cat="${c.name}" onclick="filterBar('${c.name}',this)">${c.name}</div>`).join('');
+    }
+
+    function filterFood(cat, el) {
+      currentFoodCategory = cat;
+      document.querySelectorAll('#food-pills .pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      renderFoodGrid();
+    }
+
+    function filterBar(cat, el) {
+      currentBarCategory = cat;
+      document.querySelectorAll('#bar-pills .pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      renderBarGrid();
+    }
+
+    function renderFoodGrid() {
+      const items = currentFoodCategory === 'all' ? foodItems : foodItems.filter(i => i.subcategory === currentFoodCategory);
+      const grid = document.getElementById('food-grid');
+      grid.innerHTML = items.map(item => renderMenuItem(item)).join('');
+    }
+
+    function renderBarGrid() {
+      const items = currentBarCategory === 'all' ? barItems : barItems.filter(i => i.subcategory === currentBarCategory);
+      const grid = document.getElementById('bar-grid');
+      grid.innerHTML = items.map(item => renderMenuItem(item)).join('');
+    }
+
+    function renderMenuItem(item) {
+      const qty = getCartQty(item.id);
+      return `<div class="menu-card ${item.available ? '' : 'unavailable'}">
+        <img class="menu-card-img" src="${item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}" alt="${item.name}" loading="lazy">
+        <div class="menu-card-body">
+          <div>
+            <h4>${item.name}</h4>
+            <p>${item.description || ''}</p>
+          </div>
+          <div class="menu-card-footer">
+            <span class="menu-price">ETB ${parseFloat(item.price).toFixed(2)}</span>
+            ${qty > 0 ? `<div class="qty-control">
+              <button class="qty-btn" onclick="updateCart(${item.id},-1)">-</button>
+              <span class="qty-val">${qty}</span>
+              <button class="qty-btn" onclick="updateCart(${item.id},1)">+</button>
+            </div>` : `<button class="qty-btn" style="background:var(--primary);color:#fff;border-color:var(--primary)" onclick="updateCart(${item.id},1)">+</button>`}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function getCartQty(itemId) {
+      const ci = cart.find(c => c.menu_item_id === itemId);
+      return ci ? ci.quantity : 0;
+    }
+
+    function updateCart(itemId, delta) {
+      const allItems = [...foodItems, ...barItems];
+      const item = allItems.find(i => i.id === itemId);
+      if (!item) return;
+      const existing = cart.find(c => c.menu_item_id === itemId);
+      if (existing) {
+        existing.quantity += delta;
+        if (existing.quantity <= 0) cart = cart.filter(c => c.menu_item_id !== itemId);
+      } else if (delta > 0) {
+        cart.push({ menu_item_id: itemId, name: item.name, price: parseFloat(item.price), quantity: 1, type: item.category });
+      }
+      updateCartBar();
+      renderFoodGrid();
+      renderBarGrid();
+    }
+
+    function updateCartBar() {
+      const count = cart.reduce((s, c) => s + c.quantity, 0);
+      const total = cart.reduce((s, c) => s + c.price * c.quantity, 0);
+      document.getElementById('cart-count').textContent = count;
+      document.getElementById('cart-bar').classList.toggle('visible', count > 0);
+    }
+
+    function openCart() {
+      const container = document.getElementById('cart-items');
+      if (cart.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">Your cart is empty</p>'; }
+      else {
+        container.innerHTML = cart.map(c => `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <h5>${c.name}</h5>
+              <p>ETB ${c.price.toFixed(2)} each</p>
+            </div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="openCartUpdate(${c.menu_item_id},-1)">-</button>
+              <span class="qty-val">${c.quantity}</span>
+              <button class="qty-btn" onclick="openCartUpdate(${c.menu_item_id},1)">+</button>
+            </div>
+            <span class="cart-item-price">ETB ${(c.price * c.quantity).toFixed(2)}</span>
+            <button class="cart-item-remove" onclick="removeFromCart(${c.menu_item_id})"><i class="fas fa-trash"></i></button>
+          </div>
+        `).join('');
+      }
+      document.getElementById('cart-total-val').textContent = 'ETB ' + cart.reduce((s, c) => s + c.price * c.quantity, 0).toFixed(2);
+      document.getElementById('cart-modal').classList.add('active');
+    }
+
+    function closeCart() { document.getElementById('cart-modal').classList.remove('active'); }
+
+    function openCartUpdate(itemId, delta) {
+      updateCart(itemId, delta);
+      openCart();
+    }
+
+    function removeFromCart(itemId) {
+      cart = cart.filter(c => c.menu_item_id !== itemId);
+      updateCartBar();
+      renderFoodGrid();
+      renderBarGrid();
+      openCart();
+    }
+
+    let placedOrders = [];
+
+    async function placeOrder() {
+      if (cart.length === 0) return;
+      if (!tableNumber) {
+        const t = prompt('Enter your table number to place the order:');
+        if (!t || isNaN(parseInt(t))) { showToast('A valid table number is required', true); return; }
+        window._manualTable = parseInt(t);
+      }
+      const foodOrderItems = cart.filter(c => c.type === 'food');
+      const barOrderItems = cart.filter(c => c.type === 'bar');
+      const notes = document.getElementById('order-notes').value;
+      placedOrders = [];
+
+      if (foodOrderItems.length > 0) {
+        await submitOrder('food', foodOrderItems, notes);
+      }
+      if (barOrderItems.length > 0) {
+        await submitOrder('bar', barOrderItems, notes);
+      }
+
+      cart = [];
+      updateCartBar();
+      renderFoodGrid();
+      renderBarGrid();
+      document.getElementById('order-notes').value = '';
+      closeCart();
+      saveTrackedOrders(placedOrders);
+      showOrderConfirm();
+    }
+
+    async function submitOrder(type, items, notes) {
+      const orderItems = items.map(i => ({ menu_item_id: i.menu_item_id, quantity: i.quantity }));
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table_id: window._manualTable || parseInt(tableNumber), items: orderItems, type, special_notes: notes || null })
+      });
+      const data = await res.json();
+      if (data.success) {
+        placedOrders.push({ order_number: data.order_number, type, total: data.total, items: data.items });
+      }
+    }
+
+    function showOrderConfirm() {
+      const container = document.getElementById('order-confirm-numbers');
+      container.innerHTML = placedOrders.map(o => `
+        <div class="order-num-item">
+          <span class="label">${o.type === 'bar' ? '🍸 Bar Order' : '🍽 Food Order'}</span>
+          <span class="value">${o.order_number}</span>
+        </div>
+      `).join('');
+      document.getElementById('order-confirm-modal').classList.add('active');
+      showTrackFab();
+    }
+
+    function closeOrderConfirm() {
+      document.getElementById('order-confirm-modal').classList.remove('active');
+    }
+
+    function showToast(msg, isError) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const s = await res.json();
+        if (s.restaurant_name) document.getElementById('restaurant-name').textContent = s.restaurant_name;
+        if (s.tagline) document.getElementById('restaurant-tagline').textContent = s.tagline;
+      } catch(e) {}
+    }
+    loadSettings();
+
+    // ── Floating Track Button & Tracking Sheet ──────────────────
+
+    function getTrackedOrders() {
+      try { return JSON.parse(sessionStorage.getItem('trackedOrders') || '[]'); } catch(e) { return []; }
+    }
+
+    function saveTrackedOrders(orders) {
+      const existing = getTrackedOrders();
+      orders.forEach(o => {
+        if (!existing.find(e => e.order_number === o.order_number)) {
+          existing.push({ order_number: o.order_number, type: o.type });
+        }
+      });
+      sessionStorage.setItem('trackedOrders', JSON.stringify(existing));
+    }
+
+    function restoreTrackedOrders() {
+      const orders = getTrackedOrders();
+      if (orders.length > 0) showTrackFab();
+    }
+
+    function showTrackFab() {
+      const orders = getTrackedOrders();
+      if (orders.length === 0) return;
+      const fab = document.getElementById('track-fab');
+      const badge = document.getElementById('track-fab-badge');
+      badge.textContent = orders.length;
+      fab.classList.add('visible');
+    }
+
+    async function openTrackSheet() {
+      const orders = getTrackedOrders();
+      if (orders.length === 0) return;
+      const container = document.getElementById('track-sheet-content');
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+      document.getElementById('track-sheet').classList.add('active');
+
+      await renderTrackSheet();
+      trackRefreshInterval = setInterval(renderTrackSheet, 10000);
+    }
+
+    function closeTrackSheet() {
+      document.getElementById('track-sheet').classList.remove('active');
+      if (trackRefreshInterval) { clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
+    }
+
+    async function renderTrackSheet() {
+      const tracked = getTrackedOrders();
+      const container = document.getElementById('track-sheet-content');
+      if (tracked.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">No active orders</p>';
+        document.getElementById('track-fab').classList.remove('visible');
+        return;
+      }
+
+      let html = '';
+      let activeCount = 0;
+
+      for (const t of tracked) {
+        try {
+          const res = await fetch('/api/track/' + encodeURIComponent(t.order_number));
+          if (!res.ok) continue;
+          const order = await res.json();
+          if (['completed', 'cancelled'].includes(order.status)) continue;
+          activeCount++;
+
+          const statusLabel = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+          const statusClass = 'status-' + order.status;
+          const progress = { pending: 25, preparing: 50, ready: 75 };
+          const pct = progress[order.status] || 0;
+          const canAmend = !['completed', 'cancelled'].includes(order.status);
+          const hasPending = order.pending_amendments && order.pending_amendments.length > 0;
+
+          html += `
+            <div class="order-status-card">
+              <div class="order-header">
+                <span class="order-num">${order.order_number}</span>
+                <span class="status-badge ${statusClass}">${statusLabel}</span>
+              </div>
+              <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px">
+                <div style="height:100%;width:${pct}%;background:var(--primary);border-radius:3px;transition:width .5s"></div>
+              </div>
+              <div class="order-detail-row"><span>Table</span><span>${order.table_name}</span></div>
+              <div class="order-detail-row"><span>Type</span><span>${order.type === 'bar' ? 'Bar' : 'Restaurant'}</span></div>
+              <div class="order-detail-row"><span>Placed</span><span>${new Date(order.created_at).toLocaleString()}</span></div>
+              <div class="order-detail-row"><span>Total</span><span>ETB ${parseFloat(order.total).toFixed(2)}</span></div>
+              ${order.special_notes ? `<div class="order-detail-row"><span>Notes</span><span>${order.special_notes}</span></div>` : ''}
+              <div class="order-items-list">
+                <h5>Items Ordered</h5>
+                ${order.items.map(i => `<div class="order-item-row"><span>${i.quantity}x ${i.name}</span><span>ETB ${(parseFloat(i.price) * i.quantity).toFixed(2)}</span></div>`).join('')}
+              </div>`;
+
+          if (hasPending) {
+            const pa = order.pending_amendments[0];
+            html += `<div class="pending-amend"><i class="fas fa-clock"></i> Pending ${pa.type} request: "${pa.message}" — awaiting staff review</div>`;
+          }
+
+          if (canAmend && !hasPending) {
+            html += `<div class="amend-actions">
+              <button class="amend-btn amend-btn-main" onclick="openAmendModal('${order.order_number}','amend')"><i class="fas fa-edit"></i> Change</button>
+              <button class="amend-btn cancel-btn" onclick="openAmendModal('${order.order_number}','cancel')"><i class="fas fa-times"></i> Cancel</button>
+            </div>`;
+          }
+
+          html += `</div>`;
+        } catch(e) {}
+      }
+
+      if (activeCount === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">All orders are completed or cancelled</p>';
+        sessionStorage.removeItem('trackedOrders');
+        document.getElementById('track-fab').classList.remove('visible');
+        if (trackRefreshInterval) { clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
+      } else {
+        container.innerHTML = html;
+      }
+    }
+
+    // ── Amendments ──────────────────
+
+    let amendTargetOrder = null;
+    let amendType = 'amend';
+
+    function openAmendModal(orderNumber, type) {
+      amendTargetOrder = orderNumber;
+      amendType = type;
+      document.getElementById('amend-title').textContent = type === 'cancel' ? 'Cancel Order' : 'Request Change';
+      document.getElementById('amend-message').placeholder = type === 'cancel'
+        ? 'Reason for cancellation...'
+        : 'Describe your requested change (e.g. change quantity, swap item, update notes)...';
+      document.getElementById('amend-message').value = '';
+      document.getElementById('amend-modal').classList.add('active');
+    }
+
+    function closeAmendModal() { document.getElementById('amend-modal').classList.remove('active'); }
+
+    function selectAmendType(type, el) {
+      amendType = type;
+      document.querySelectorAll('.amend-type-opt').forEach(o => o.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('amend-title').textContent = type === 'cancel' ? 'Cancel Order' : 'Request Change';
+      document.getElementById('amend-message').placeholder = type === 'cancel'
+        ? 'Reason for cancellation...'
+        : 'Describe your requested change...';
+    }
+
+    async function submitAmendment() {
+      const message = document.getElementById('amend-message').value.trim();
+      if (!message) { showToast('Please enter a message', true); return; }
+      if (!amendTargetOrder) return;
+
+      try {
+        const res = await fetch('/api/amendments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_number: amendTargetOrder, type: amendType, message })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        closeAmendModal();
+        showToast('Request submitted! Staff will review shortly.');
+        await renderTrackSheet();
+      } catch (e) {
+        showToast(e.message || 'Failed to submit', true);
+      }
+    }
+  </script>
+</body>
+</html>

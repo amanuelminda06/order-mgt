@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Sunset Bistro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--primary:#d4764e;--primary-dark:#b85a35;--dark:#1a0f0a;--dark2:#2c1810;--text:#1a0f0a;--text-muted:#8b7355;--bg:#faf6f1;--card:#ffffff;--border:#e8ddd0;--success:#27ae60;--error:#e74c3c;--warning:#f39c12;--bar:#2980b9;--font-serif:'Playfair Display',serif;--font-sans:'Inter',sans-serif;--radius:12px;--radius-sm:8px;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+    body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh}
+    .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+    .login-box{background:var(--card);padding:40px;border-radius:var(--radius);border:1px solid var(--border);max-width:400px;width:100%;box-shadow:var(--shadow)}
+    .login-box h1{font-family:var(--font-serif);text-align:center;color:var(--primary);margin-bottom:24px;font-size:1.3rem}
+    .login-box label{font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:4px}
+    .login-box input{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;margin-bottom:16px;background:var(--bg);font-family:var(--font-sans)}
+    .login-box input:focus{outline:none;border-color:var(--primary)}
+    .btn{padding:12px 24px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-family:var(--font-sans);font-size:0.9rem;transition:all .2s}
+    .btn-primary{background:var(--primary);color:#fff;width:100%}
+    .btn-sm{padding:6px 14px;font-size:0.8rem}
+    .btn-success{background:var(--success);color:#fff}
+    .btn-danger{background:var(--error);color:#fff}
+    .error-msg{color:var(--error);font-size:0.8rem;text-align:center;margin-top:8px;display:none}
+    .admin{display:none}.admin.active{display:block}
+    .admin-header{background:var(--dark2);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .admin-header h2{font-family:var(--font-serif);font-size:1.1rem}
+    .admin-header .user-info{font-size:0.8rem;opacity:0.7}
+    .admin-tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:56px;z-index:99}
+    .admin-tab{padding:14px 20px;font-size:0.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
+    .admin-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .admin-tab i{margin-right:6px}
+    .admin-content{padding:16px;display:none}.admin-content.active{display:block}
+    .admin-content h3{font-family:var(--font-serif);font-size:1.1rem;margin-bottom:16px;color:var(--dark2)}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+    @media(min-width:600px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
+    .stat-card .stat-val{font-size:1.5rem;font-weight:700;color:var(--primary);font-family:var(--font-serif)}
+    .stat-card .stat-label{font-size:0.75rem;color:var(--text-muted);margin-top:4px}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+    .chart-card h4{font-family:var(--font-serif);margin-bottom:12px;color:var(--dark2);font-size:1rem}
+    .top-items{list-style:none}.top-items li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem}.top-items li:last-child{border:none}
+    .top-items .bar{height:6px;background:var(--primary);border-radius:3px;margin-top:4px}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+    th{color:var(--text-muted);font-weight:600;background:var(--bg);white-space:nowrap;font-size:0.8rem}
+    .avail-toggle{width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;transition:all .2s;position:relative}
+    .avail-toggle.on{background:var(--success)}.avail-toggle.off{background:var(--error)}
+    .avail-toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;transition:left .2s}
+    .avail-toggle.on::after{left:20px}.avail-toggle.off::after{left:2px}
+    .modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal-overlay.active{display:flex}
+    .modal{background:var(--card);border-radius:var(--radius);padding:32px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto}
+    .modal h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--primary)}
+    .modal label{font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:4px;margin-top:8px}
+    .modal input,.modal select,.modal textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);background:var(--bg)}
+    .modal-actions{display:flex;gap:8px;margin-top:16px}
+    .filter-pills{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .fpill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:0.8rem;cursor:pointer;transition:all .2s}
+    .fpill.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .qr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
+    .qr-card img{max-width:150px;margin:8px auto}
+    .qr-card h4{font-family:var(--font-serif);font-size:0.9rem}
+    .qr-card p{font-size:0.75rem;color:var(--text-muted);word-break:break-all}
+    .period-pills{display:flex;gap:8px;margin-bottom:16px}
+    .period-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:0.8rem;cursor:pointer}
+    .period-pill.active{background:var(--dark2);color:#fff;border-color:var(--dark2)}
+    .amend-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--warning);border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)}
+    .amend-card-info{flex:1}
+    .amend-card-info .amend-order{font-weight:700;color:var(--primary)}
+    .amend-card-info .amend-type{font-weight:700;text-transform:uppercase;color:var(--warning);font-size:0.75rem;margin-left:8px}
+    .amend-card-info .amend-msg{font-size:0.85rem;color:var(--text-muted);margin-top:4px}
+    .amend-card-actions{display:flex;gap:6px}
+    .amend-card-actions button{padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer}
+    .amend-approve{background:var(--success);color:#fff}
+    .amend-deny{background:var(--error);color:#fff}
+    .staff-view{display:none}.staff-view.active{display:block}
+    .cat-section-label{font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+    .cat-list{list-style:none;margin-bottom:12px}
+    .cat-list li{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:0.85rem}
+    .cat-list li .cat-actions{display:flex;gap:6px}
+    .cat-list li .cat-actions button{padding:4px 10px;border:none;border-radius:4px;font-size:0.75rem;cursor:pointer;font-weight:600}
+    .cat-edit-btn{background:var(--dark2);color:#fff}
+    .cat-delete-btn{background:var(--error);color:#fff}
+    .cat-add-row{display:flex;gap:8px;margin-top:8px}
+    .cat-add-row input{flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:var(--font-sans)}
+    .cat-add-row button{padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.85rem;white-space:nowrap}
+    .filter-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+    .filter-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text-muted);font-size:0.8rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+    .filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .orders-grid{display:grid;gap:12px}
+    .order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+    .order-card.status-pending{border-left-color:var(--warning)}
+    .order-card.status-preparing{border-left-color:var(--bar)}
+    .order-card.status-ready{border-left-color:var(--success)}
+    .order-card .order-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:10px}
+    .order-card .order-number{font-weight:700;font-size:0.95rem}
+    .order-card .order-table{background:var(--bg);padding:3px 10px;border-radius:10px;font-size:0.75rem;font-weight:600;color:var(--text-muted)}
+    .order-card .order-time{font-size:0.7rem;color:var(--text-muted)}
+    .order-card .order-items{margin:10px 0;font-size:0.85rem;list-style:none;padding:0}
+    .order-card .order-items li{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+    .order-card .order-items li:last-child{border:none}
+    .order-card .order-notes{background:rgba(243,156,18,0.1);border:1px solid rgba(243,156,18,0.3);padding:8px;border-radius:var(--radius-sm);font-size:0.8rem;color:#8a6d3b;margin:8px 0}
+    .order-card .order-footer{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .order-card .order-total{font-weight:700;color:var(--primary);font-size:1rem}
+    @media(min-width:600px){.orders-grid{grid-template-columns:1fr 1fr}}
+    @media(min-width:900px){.orders-grid{grid-template-columns:1fr 1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div id="login-page" class="login-page">
+    <div class="login-box">
+      <h1><i class="fas fa-utensils"></i> Sunset Bistro<br>Admin Panel</h1>
+      <form id="login-form">
+        <label>Username</label><input type="text" id="username" required>
+        <label>Password</label><input type="password" id="password" required>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <div id="login-error" class="error-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin" class="admin">
+    <div class="admin-header">
+      <h2 id="admin-header-title">Sunset Bistro Admin</h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="user-info" id="admin-user"></span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="switchTab('orders',this)"><i class="fas fa-receipt"></i>Orders</div>
+      <div class="admin-tab" onclick="switchTab('menu',this)"><i class="fas fa-utensils"></i>Menu</div>
+      <div class="admin-tab" onclick="switchTab('categories',this)"><i class="fas fa-layer-group"></i>Categories</div>
+      <div class="admin-tab" onclick="switchTab('tables',this)"><i class="fas fa-chair"></i>Tables & QR</div>
+      <div class="admin-tab" onclick="switchTab('staff',this)"><i class="fas fa-users"></i>Staff</div>
+      <div class="admin-tab" onclick="switchTab('analytics',this)"><i class="fas fa-chart-bar"></i>Analytics</div>
+    </div>
+
+    <div id="tab-orders" class="admin-content active">
+      <div id="pending-amendments-section" style="display:none;margin-bottom:20px">
+        <h3 style="color:var(--warning)"><i class="fas fa-exclamation-triangle"></i> Pending Amendment Requests</h3>
+        <div id="amendments-list"></div>
+      </div>
+      <div class="filter-pills" id="order-filters">
+        <div class="fpill active" onclick="filterOrders('all',this)">All</div>
+        <div class="fpill" onclick="filterOrders('pending',this)">Pending</div>
+        <div class="fpill" onclick="filterOrders('preparing',this)">Preparing</div>
+        <div class="fpill" onclick="filterOrders('ready',this)">Ready</div>
+        <div class="fpill" onclick="filterOrders('completed',this)">Completed</div>
+        <div class="fpill" onclick="filterOrders('cancelled',this)">Cancelled</div>
+      </div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Order</th><th>Table</th><th>Type</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody id="orders-tbody"></tbody></table></div>
+    </div>
+
+    <div id="tab-menu" class="admin-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">Menu Items</h3>
+        <button class="btn btn-primary btn-sm" onclick="openMenuModal()">+ Add Item</button>
+      </div>
+      <div class="filter-pills" id="menu-filters">
+        <div class="fpill active" onclick="filterMenu('all',this)">All</div>
+        <div class="fpill" onclick="filterMenu('food',this)">Food</div>
+        <div class="fpill" onclick="filterMenu('bar',this)">Bar</div>
+      </div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Category</th><th>Sub</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead><tbody id="menu-tbody"></tbody></table></div>
+    </div>
+
+    <div id="tab-categories" class="admin-content">
+      <h3>Menu Categories</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">Manage subcategories for the Restaurant and Bar menus.</p>
+      <div class="cat-section-label"><i class="fas fa-utensils"></i> Restaurant Categories</div>
+      <ul class="cat-list" id="food-cat-list"></ul>
+      <div class="cat-add-row">
+        <input type="text" id="new-food-cat" placeholder="New restaurant category name...">
+        <button onclick="addCategory('food')"><i class="fas fa-plus"></i> Add</button>
+      </div>
+      <div class="cat-section-label" style="margin-top:24px"><i class="fas fa-cocktail"></i> Bar Categories</div>
+      <ul class="cat-list" id="bar-cat-list"></ul>
+      <div class="cat-add-row">
+        <input type="text" id="new-bar-cat" placeholder="New bar category name...">
+        <button onclick="addCategory('bar')"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    </div>
+
+    <div id="tab-tables" class="admin-content">
+      <h3>Tables & QR Codes</h3>
+      <div class="qr-grid" id="qr-grid"></div>
+    </div>
+
+    <div id="tab-staff" class="admin-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">Staff Management</h3>
+        <button class="btn btn-primary btn-sm" onclick="openStaffModal()">+ Add Staff</button>
+      </div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead><tbody id="staff-tbody"></tbody></table></div>
+    </div>
+
+    <div id="tab-analytics" class="admin-content">
+      <div class="period-pills">
+        <div class="period-pill active" onclick="loadAnalytics('today',this)">Today</div>
+        <div class="period-pill" onclick="loadAnalytics('week',this)">This Week</div>
+        <div class="period-pill" onclick="loadAnalytics('month',this)">This Month</div>
+      </div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="chart-card" style="grid-column:1/-1"><h4>Revenue Breakdown</h4><div id="revenue-chart"></div></div>
+        <div class="chart-card"><h4>Top Items</h4><ul class="top-items" id="top-items-list"></ul></div>
+        <div class="chart-card"><h4>Hourly Orders</h4><div id="hourly-chart" style="display:flex;align-items:end;height:100px;gap:2px"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="staff-view" class="staff-view">
+    <div class="admin-header">
+      <h2 id="staff-header-title">Live Orders</h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="user-info" id="staff-user-info"></span>
+        <span class="role-badge" id="staff-role-badge"></span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <div class="filter-bar" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card)">
+      <button class="filter-btn active" onclick="staffSetFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="staffSetFilter('pending',this)">Pending</button>
+      <button class="filter-btn" onclick="staffSetFilter('preparing',this)">Preparing</button>
+      <button class="filter-btn" onclick="staffSetFilter('ready',this)">Ready</button>
+    </div>
+    <div style="padding:16px">
+      <div class="orders-grid" id="staff-orders-grid"></div>
+      <div class="empty-state" id="staff-empty-state" style="display:none"><i class="fas fa-clock"></i><p>No orders at the moment</p></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-title">Add Item</h3>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-sm" id="modal-save">Save</button>
+        <button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border)" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffFilter='all', staffRefreshInterval;
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl=document.getElementById('login-error'); errEl.style.display='none';
+      const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('username').value,password:document.getElementById('password').value})});
+      const data=await res.json();
+      if (res.ok) {
+        token=data.token; userRole=data.role;
+        document.getElementById('login-page').style.display='none';
+        document.getElementById('admin-user').textContent=data.full_name;
+        document.getElementById('staff-user-info').textContent=data.full_name;
+        document.getElementById('staff-role-badge').textContent=data.role;
+        document.getElementById('staff-role-badge').className='role-badge role-'+data.role;
+        if (data.role==='admin') {
+          document.getElementById('admin').classList.add('active');
+          document.getElementById('admin-header-title').textContent='Sunset Bistro Admin';
+          loadAll();
+        } else {
+          document.getElementById('staff-view').classList.add('active');
+          document.getElementById('staff-header-title').textContent=data.role==='bartender'?'Bar Orders':'Live Orders';
+          loadStaffOrders();
+          staffRefreshInterval=setInterval(loadStaffOrders,8000);
+        }
+      } else { errEl.textContent=data.error||'Login failed'; errEl.style.display='block'; }
+    });
+
+    function logout(){token='';userRole='';clearInterval(staffRefreshInterval);document.getElementById('login-page').style.display='flex';document.getElementById('admin').classList.remove('active');document.getElementById('staff-view').classList.remove('active');}
+    function switchTab(t,el){document.querySelectorAll('.admin-tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.admin-content').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+t).classList.add('active');}
+    function closeModal(){document.getElementById('modal-overlay').classList.remove('active');}
+    function loadAll(){loadAmendments();loadOrders();loadMenuTable();loadCategories();loadTablesQR();loadStaffTable();loadAnalytics('today');}
+
+    // ORDERS
+    function filterOrders(f,el){currentOrderFilter=f;document.querySelectorAll('#order-filters .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');loadOrders();}
+
+    // AMENDMENTS
+    async function loadAmendments(){
+      const res=await fetch('/api/amendments?status=pending',{headers:{'Authorization':token}});
+      if (res.status===401){return;}
+      const amendments=await res.json();
+      const section=document.getElementById('pending-amendments-section');
+      const list=document.getElementById('amendments-list');
+      if(amendments.length===0){section.style.display='none';return;}
+      section.style.display='block';
+      list.innerHTML=amendments.map(a=>`
+        <div class="amend-card">
+          <div class="amend-card-info">
+            <span class="amend-order">${a.order_number}</span>
+            <span class="amend-type">${a.type}</span>
+            <div class="amend-msg">"${a.message}"</div>
+          </div>
+          <div class="amend-card-actions">
+            <button class="amend-approve" onclick="resolveAmendment(${a.id},'approved')"><i class="fas fa-check"></i> Approve</button>
+            <button class="amend-deny" onclick="resolveAmendment(${a.id},'denied')"><i class="fas fa-times"></i> Deny</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    async function resolveAmendment(id,status){
+      await fetch(`/api/amendments/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});
+      loadAmendments();loadOrders();
+    }
+    async function loadOrders(){
+      const res=await fetch('/api/orders',{headers:{'Authorization':token}});
+      if (res.status===401){logout();return;}
+      let orders=await res.json();
+      if (currentOrderFilter!=='all')orders=orders.filter(o=>o.status===currentOrderFilter);
+      document.getElementById('orders-tbody').innerHTML=orders.map(o=>{
+        const items=o.items.map(i=>`${i.quantity}x ${i.name}`).join(', ');
+        const time=new Date(o.created_at).toLocaleString();
+        const sc={pending:'var(--warning)',preparing:'var(--bar)',ready:'var(--success)',completed:'var(--text-muted)',cancelled:'var(--error)'};
+        return `<tr><td><strong>${o.order_number}</strong></td><td>${o.table_name}</td><td>${o.type==='bar'?'🍸 Bar':'🍽 Food'}</td><td style="max-width:200px;font-size:0.8rem">${items}</td><td><strong>ETB ${o.total.toFixed(2)}</strong></td><td><span style="color:${sc[o.status]||'inherit'};font-weight:600;text-transform:capitalize">${o.status}</span></td><td style="font-size:0.75rem">${time}</td><td><select style="padding:4px;border-radius:4px;font-size:0.75rem;border:1px solid var(--border)" onchange="changeStatus(${o.id},this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="completed" ${o.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select></td></tr>`;
+      }).join('');
+    }
+    async function changeStatus(id,s){await fetch(`/api/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status:s})});loadOrders();}
+
+    // MENU
+    function filterMenu(f,el){currentMenuFilter=f;document.querySelectorAll('#menu-filters .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');loadMenuTable();}
+    async function loadMenuTable(){
+      let url='/api/menu'+(currentMenuFilter!=='all'?`?category=${currentMenuFilter}`:'');
+      const res=await fetch(url);const items=await res.json();
+      document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong></td><td>${i.category==='bar'?'🍸 Bar':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${i.price.toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
+    }
+    async function toggleAvail(id,av){await fetch(`/api/menu/${id}/availability`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({available:av})});loadMenuTable();}
+    async function deleteItem(id){if(!confirm('Delete?'))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
+
+    let allMenuItems=[];
+    async function fetchAllMenu(){const r=await fetch('/api/menu');allMenuItems=await r.json();}
+    async function editItem(id){await fetchAllMenu();const item=allMenuItems.find(i=>i.id===id);if(item)openMenuModal(item);}
+
+    function openMenuModal(item=null){
+      editId=item?item.id:null;
+      document.getElementById('modal-title').textContent=item?'Edit Item':'Add Item';
+      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Bar</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Image URL</label><input type="text" id="m-img" value="${item?.image||''}">`;
+      document.getElementById('modal-save').onclick=saveMenu;
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+    async function saveMenu(){
+      const data={name:document.getElementById('m-name').value,description:document.getElementById('m-desc').value,price:document.getElementById('m-price').value,category:document.getElementById('m-cat').value,subcategory:document.getElementById('m-sub').value,image:document.getElementById('m-img').value};
+      const method=editId?'PUT':'POST';const url=editId?`/api/menu/${editId}`:'/api/menu';
+      await fetch(url,{method,headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify(data)});
+      closeModal();loadMenuTable();
+    }
+
+    // CATEGORIES
+    async function loadCategories(){
+      const res=await fetch('/api/categories');
+      const cats=await res.json();
+      const foodCats=cats.filter(c=>c.section==='food');
+      const barCats=cats.filter(c=>c.section==='bar');
+      document.getElementById('food-cat-list').innerHTML=foodCats.map(c=>`
+        <li>
+          <span>${c.name}</span>
+          <div class="cat-actions">
+            <button class="cat-edit-btn" onclick="editCategory(${c.id},'${c.name.replace(/'/g,"\\'")}')"><i class="fas fa-pen"></i></button>
+            <button class="cat-delete-btn" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
+          </div>
+        </li>
+      `).join('')||'<li style="color:var(--text-muted);justify-content:center">No categories yet</li>';
+      document.getElementById('bar-cat-list').innerHTML=barCats.map(c=>`
+        <li>
+          <span>${c.name}</span>
+          <div class="cat-actions">
+            <button class="cat-edit-btn" onclick="editCategory(${c.id},'${c.name.replace(/'/g,"\\'")}')"><i class="fas fa-pen"></i></button>
+            <button class="cat-delete-btn" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
+          </div>
+        </li>
+      `).join('')||'<li style="color:var(--text-muted);justify-content:center">No categories yet</li>';
+    }
+    async function addCategory(section){
+      const input=document.getElementById('new-'+section+'-cat');
+      const name=input.value.trim();
+      if(!name)return;
+      const res=await fetch('/api/categories',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name,section})});
+      const data=await res.json();
+      if(!res.ok){alert(data.error);return;}
+      input.value='';
+      loadCategories();
+    }
+    async function editCategory(id,currentName){
+      const newName=prompt('Rename category:',currentName);
+      if(!newName||newName===currentName)return;
+      await fetch(`/api/categories/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name:newName})});
+      loadCategories();
+    }
+    async function deleteCategory(id){
+      if(!confirm('Delete this category? Items using it will keep their subcategory text.'))return;
+      await fetch(`/api/categories/${id}`,{method:'DELETE',headers:{'Authorization':token}});
+      loadCategories();
+    }
+
+    // TABLES
+    async function loadTablesQR(){
+      const res=await fetch('/api/tables');const tables=await res.json();
+      const grid=document.getElementById('qr-grid');grid.innerHTML='';
+      for(const t of tables){
+        const qrRes=await fetch(`/api/tables/${t.id}/qr`);const{qr,url}=await qrRes.json();
+        grid.innerHTML+=`<div class="qr-card"><h4>${t.name}</h4><p>Capacity: ${t.capacity}</p><img src="${qr}"><p style="font-size:0.7rem;color:var(--primary)">${url}</p><button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);margin-top:8px" onclick="window.open('${url}','_blank')">Open</button></div>`;
+      }
+    }
+
+    // STAFF
+    async function loadStaffTable(){
+      const res=await fetch('/api/staff',{headers:{'Authorization':token}});
+      const staff=await res.json();
+      document.getElementById('staff-tbody').innerHTML=staff.map(s=>`<tr><td>${s.username}</td><td>${s.full_name}</td><td><span style="text-transform:capitalize">${s.role}</span></td><td>${s.active?'✅':'❌'}</td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="toggleStaff(${s.id},${!s.active})">${s.active?'Deactivate':'Activate'}</button></td></tr>`).join('');
+    }
+    async function toggleStaff(id,active){await fetch(`/api/staff/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({active})});loadStaffTable();}
+    function openStaffModal(){
+      document.getElementById('modal-title').textContent='Add Staff';
+      document.getElementById('modal-body').innerHTML=`<label>Username</label><input type="text" id="s-user" required><label>Full Name</label><input type="text" id="s-fname" required><label>Password</label><input type="text" id="s-pw" required><label>Role</label><select id="s-role"><option value="waiter">Waiter</option><option value="bartender">Bartender</option><option value="admin">Admin</option></select>`;
+      document.getElementById('modal-save').onclick=async()=>{
+        await fetch('/api/staff',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({username:document.getElementById('s-user').value,full_name:document.getElementById('s-fname').value,password:document.getElementById('s-pw').value,role:document.getElementById('s-role').value})});
+        closeModal();loadStaffTable();
+      };
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    // STAFF DASHBOARD (live orders view)
+    function staffSetFilter(f,el){staffFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadStaffOrders();}
+    async function loadStaffOrders(){
+      const res=await fetch(`/api/orders/live?role=${userRole}`,{headers:{'Authorization':token}});
+      if(res.status===401){logout();return;}
+      let orders=await res.json();
+      if(staffFilter!=='all')orders=orders.filter(o=>o.status===staffFilter);
+      let allAmendments=[];
+      try{const aRes=await fetch('/api/amendments?status=pending',{headers:{'Authorization':token}});if(aRes.ok)allAmendments=await aRes.json();}catch(e){}
+      const grid=document.getElementById('staff-orders-grid');
+      const empty=document.getElementById('staff-empty-state');
+      if(orders.length===0){grid.innerHTML='';empty.style.display='block';return;}
+      empty.style.display='none';
+      grid.innerHTML=orders.map(o=>{
+        const time=new Date(o.created_at).toLocaleTimeString();
+        const ago=Math.floor((Date.now()-new Date(o.created_at).getTime())/60000);
+        const agoStr=ago<1?'Just now':ago<60?ago+'m ago':Math.floor(ago/60)+'h ago';
+        const items=o.items.map(i=>`<li><span>${i.quantity}x ${i.name}</span><span>${i.notes?'📝 '+i.notes:''}</span></li>`).join('');
+        const orderAmendments=allAmendments.filter(a=>a.order_id===o.id);
+        const amendHtml=orderAmendments.map(a=>`
+          <div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:var(--radius-sm);padding:10px;margin:8px 0;font-size:0.82rem">
+            <i class="fas fa-exclamation-triangle" style="color:var(--warning);margin-right:4px"></i>
+            <strong style="text-transform:uppercase;color:var(--error)">${a.type}</strong> request: "${a.message}"
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--success);color:#fff" onclick="staffResolveAmendment(${a.id},'approved')"><i class="fas fa-check"></i> Approve</button>
+              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--error);color:#fff" onclick="staffResolveAmendment(${a.id},'denied')"><i class="fas fa-times"></i> Deny</button>
+            </div>
+          </div>
+        `).join('');
+        return `<div class="order-card status-${o.status}">
+          <div class="order-header"><span class="order-number">${o.order_number}</span><span class="order-table"><i class="fas fa-chair"></i> ${o.table_name}</span></div>
+          <div class="order-time"><i class="fas fa-clock"></i> ${time} (${agoStr}) · ${o.type==='bar'?'🍸 Bar':'🍽 Food'}</div>
+          <ul class="order-items">${items}</ul>
+          ${o.special_notes?`<div class="order-notes"><i class="fas fa-sticky-note"></i> ${o.special_notes}</div>`:''}
+          ${amendHtml}
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="order-total">ETB ${parseFloat(o.total).toFixed(2)}</span>
+            <div class="order-footer">
+              ${o.status==='pending'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--bar);color:#fff" onclick="staffUpdateStatus(${o.id},'preparing')">Start Preparing</button>`:''}
+              ${o.status==='preparing'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--success);color:#fff" onclick="staffUpdateStatus(${o.id},'ready')">Mark Ready</button>`:''}
+              ${o.status==='ready'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--dark);color:#fff" onclick="staffUpdateStatus(${o.id},'completed')">Completed</button>`:''}
+              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--error);color:#fff" onclick="staffUpdateStatus(${o.id},'cancelled')">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    async function staffUpdateStatus(id,status){await fetch(`/api/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});loadStaffOrders();}
+    async function staffResolveAmendment(id,status){await fetch(`/api/amendments/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});loadStaffOrders();}
+
+    // ANALYTICS
+    async function loadAnalytics(period,el){
+      if(el){document.querySelectorAll('.period-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');}
+      const res=await fetch(`/api/analytics?period=${period}`,{headers:{'Authorization':token}});const a=await res.json();
+      document.getElementById('stat-grid').innerHTML=`<div class="stat-card"><div class="stat-val">${a.totalOrders}</div><div class="stat-label">Total Orders</div></div><div class="stat-card"><div class="stat-val">ETB ${a.totalRevenue}</div><div class="stat-label">Total Revenue</div></div><div class="stat-card"><div class="stat-val">ETB ${a.foodRevenue}</div><div class="stat-label">Food (${a.foodOrdersCount})</div></div><div class="stat-card"><div class="stat-val">ETB ${a.barRevenue}</div><div class="stat-label">Bar (${a.barOrdersCount})</div></div>`;
+      const fp=a.totalRevenue>0?(parseFloat(a.foodRevenue)/parseFloat(a.totalRevenue)*100).toFixed(0):0;
+      document.getElementById('revenue-chart').innerHTML=`<div style="display:flex;height:24px;border-radius:12px;overflow:hidden;margin-bottom:8px"><div style="width:${fp}%;background:var(--primary)"></div><div style="width:${100-fp}%;background:var(--bar)"></div></div><div style="display:flex;justify-content:space-between;font-size:0.8rem"><span>🍽 Food: ETB ${a.foodRevenue} (${fp}%)</span><span>🍸 Bar: ETB ${a.barRevenue} (${100-fp}%)</span></div><div style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">Avg Order: <strong>ETB ${a.avgOrderValue}</strong></div>`;
+      document.getElementById('top-items-list').innerHTML=a.topItems.length?a.topItems.map(([n,c])=>{const mx=a.topItems[0][1];return `<li><span>${n}</span><span>${c} orders</span></li><div class="bar" style="width:${c/mx*100}%"></div>`;}).join(''):'<li style="color:var(--text-muted)">No data yet</li>';
+      const maxH=Math.max(...Object.values(a.hourlyData),1);
+      document.getElementById('hourly-chart').innerHTML=Object.entries(a.hourlyData).map(([h,c])=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:100%;background:var(--primary);height:${c/maxH*100}px;border-radius:2px 2px 0 0;min-height:2px"></div><span style="font-size:0.55rem;color:var(--text-muted);margin-top:2px">${h}h</span></div>`).join('')||'<p style="color:var(--text-muted);font-size:0.8rem">No data</p>';
+    }
+  </script>
+</body>
+</html>
