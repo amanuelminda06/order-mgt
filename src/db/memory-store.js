@@ -24,7 +24,7 @@ const counters = {
 
 // ── Tables ────────────────────────────────────────────────
 const tables = [];
-for (let i = 1; i <= 10; i++) {
+for (let i = 1; i <= 30; i++) {
   const names = { 1: 'Patio 1', 2: 'Patio 2', 3: 'Patio 3', 4: 'Hall 1', 5: 'Hall 2', 6: 'Hall 3', 7: 'VIP 1', 8: 'VIP 2', 9: 'Bar 1', 10: 'Bar 2' };
   const caps = { 3: 2, 6: 8, 9: 2, 10: 2 };
   tables.push({ id: i, table_number: i, name: names[i] || `Table ${i}`, capacity: caps[i] || 4 });

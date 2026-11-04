@@ -61,6 +61,8 @@
     .modal label{font-size:0.8rem;color:var(--text-muted);display:block;margin-bottom:4px;margin-top:8px}
     .modal input,.modal select,.modal textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);background:var(--bg)}
     .modal-actions{display:flex;gap:8px;margin-top:16px}
+    .img-preview{display:block;max-width:140px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px}
+    .img-hint{font-size:0.72rem;color:var(--text-muted);margin-top:6px}
     .filter-pills{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
     .fpill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:0.8rem;cursor:pointer;transition:all .2s}
     .fpill.active{background:var(--accent);color:var(--text);border-color:var(--primary);font-weight:700}
@@ -342,18 +344,48 @@
     async function deleteItem(id){if(!confirm('Delete?'))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
 
     let allMenuItems=[];
+    let editingImage='';
     async function fetchAllMenu(){const r=await fetch('/api/menu');allMenuItems=await r.json();}
     async function editItem(id){await fetchAllMenu();const item=allMenuItems.find(i=>i.id===id);if(item)openMenuModal(item);}
 
     function openMenuModal(item=null){
       editId=item?item.id:null;
+      editingImage=item?.image||'';
       document.getElementById('modal-title').textContent=item?'Edit Item':'Add Item';
-      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Image URL</label><input type="text" id="m-img" value="${item?.image||''}">`;
+      document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><input type="text" id="m-sub" value="${item?.subcategory||''}" placeholder="e.g. Mains, Cocktails"><label>Photo</label><img id="m-img-preview" class="img-preview" alt="" src="${editingImage}" style="${editingImage?'':'display:none'}"><input type="file" id="m-img-file" accept="image/*" onchange="previewMenuItemImage(this)"><p class="img-hint" id="m-img-status">JPG, PNG, WebP or GIF · up to 5 MB${editingImage?'':' · no photo yet'}</p>`;
       document.getElementById('modal-save').onclick=saveMenu;
       document.getElementById('modal-overlay').classList.add('active');
     }
+    function previewMenuItemImage(input){
+      const file=input.files&&input.files[0];
+      if(!file)return;
+      const prev=document.getElementById('m-img-preview');
+      prev.src=URL.createObjectURL(file);prev.style.display='block';
+      const status=document.getElementById('m-img-status');
+      status.style.color='var(--text-muted)';
+      status.textContent=file.size>5*1024*1024?`${file.name} is too large — 5 MB maximum`:file.name+' · '+Math.round(file.size/1024)+' KB';
+    }
+    function readFileAsDataUrl(file){
+      return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(file);});
+    }
+    async function uploadMenuItemImage(file){
+      const dataUrl=await readFileAsDataUrl(file);
+      const res=await fetch('/api/menu/images',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name:file.name,dataUrl})});
+      const out=await res.json();
+      if(!res.ok)throw new Error(out.error||'Upload failed');
+      return out.url;
+    }
     async function saveMenu(){
-      const data={name:document.getElementById('m-name').value,description:document.getElementById('m-desc').value,price:document.getElementById('m-price').value,category:document.getElementById('m-cat').value,subcategory:document.getElementById('m-sub').value,image:document.getElementById('m-img').value};
+      const status=document.getElementById('m-img-status');
+      const fileInput=document.getElementById('m-img-file');
+      const file=fileInput&&fileInput.files?fileInput.files[0]:null;
+      let image=editingImage;
+      if(file){
+        if(file.size>5*1024*1024){status.style.color='var(--error)';status.textContent=file.name+' is too large — 5 MB maximum';return;}
+        try{status.style.color='var(--text-muted)';status.textContent='Uploading photo…';image=await uploadMenuItemImage(file);}
+        catch(e){status.style.color='var(--error)';status.textContent=e.message;return;}
+      }
+      const data={name:document.getElementById('m-name').value,description:document.getElementById('m-desc').value,price:document.getElementById('m-price').value,category:document.getElementById('m-cat').value,subcategory:document.getElementById('m-sub').value,image};
       const method=editId?'PUT':'POST';const url=editId?`/api/menu/${editId}`:'/api/menu';
       await fetch(url,{method,headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify(data)});
       closeModal();loadMenuTable();

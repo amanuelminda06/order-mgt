@@ -24,7 +24,9 @@ function createApp() {
   const app = express();
 
   app.use(cors());
-  app.use(express.json());
+  // Menu photos arrive as base64 data URLs, so the JSON body can exceed the
+  // 100kb default (5 MB image ≈ 6.7 MB encoded).
+  app.use(express.json({ limit: '8mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.static(path.join(__dirname, '..', 'public')));
 

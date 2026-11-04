@@ -95,7 +95,7 @@ async function main() {
   // ── Public reads ────────────────────────────────────────
   res = await fetch(`${base}/api/tables`);
   const tables = await expect('GET /api/tables (public)', res, 200);
-  check('GET /api/tables seeds 10 tables', () => assert.strictEqual(tables.length, 10));
+  check('GET /api/tables seeds 30 tables', () => assert.strictEqual(tables.length, 30));
 
   res = await fetch(`${base}/api/tables/1/qr`);
   const qr = await expect('GET /api/tables/1/qr (public)', res, 200);

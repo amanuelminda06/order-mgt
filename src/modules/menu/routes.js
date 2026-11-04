@@ -1,9 +1,44 @@
 /** Menu items. Public read; admin-only writes (legacy behaviour). */
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const { menuItems } = require('../../db/memory-store');
 const { requireAuth, requireAdmin } = require('../../auth/middleware');
 
 const router = express.Router();
+
+// Menu photos are sent as base64 data URLs from the admin form and written to
+// public/uploads/menu, which express.static already serves.
+const UPLOAD_DIR = path.join(__dirname, '..', '..', '..', 'public', 'uploads', 'menu');
+const UPLOAD_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+// POST /api/menu/images — admin only. Returns the public path to store on an item.
+router.post('/api/menu/images', requireAuth, requireAdmin, (req, res) => {
+  const { name, dataUrl } = req.body || {};
+  const match = /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=\s]+)$/i.exec(String(dataUrl || ''));
+  if (!match) return res.status(400).json({ error: 'Expected a base64 image data URL' });
+  const ext = UPLOAD_TYPES[match[1].toLowerCase()];
+  if (!ext) return res.status(400).json({ error: 'Unsupported image type — use JPG, PNG, WebP or GIF' });
+  const buffer = Buffer.from(match[2], 'base64');
+  if (!buffer.length) return res.status(400).json({ error: 'Image is empty' });
+  if (buffer.length > MAX_UPLOAD_BYTES) return res.status(413).json({ error: 'Image is larger than 5 MB' });
+
+  const base = String(name || 'item')
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'item';
+  const filename = `${base}-${Date.now()}.${ext}`;
+  try {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    fs.writeFileSync(path.join(UPLOAD_DIR, filename), buffer);
+  } catch (e) {
+    return res.status(500).json({ error: 'Could not save image' });
+  }
+  res.json({ success: true, url: `/uploads/menu/${filename}` });
+});
 
 router.get('/api/menu', (req, res) => {
   let items = [...menuItems];
