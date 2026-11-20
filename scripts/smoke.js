@@ -29,6 +29,8 @@ process.env.AUTH_STORE = 'db';
 process.env.JWT_SECRET = 'smoke-test-secret';
 process.env.TELEGRAM_BOT_TOKEN = '';
 process.env.TELEGRAM_CHAT_ID = '';
+// The gate is off by default for handover; the smoke suite still verifies it.
+process.env.FORCE_PASSWORD_CHANGE = 'true';
 
 const OFFLINE = process.env.SMOKE_OFFLINE === '1';
 if (OFFLINE && process.env.ALLOW_LIVE_SMOKE === '1') {

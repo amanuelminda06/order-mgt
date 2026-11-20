@@ -29,7 +29,9 @@ reads the cookie first, then the `Authorization` header.
 ### Forced password change
 
 `users.must_change_password` is set on every pre-migration account and on admin
-reset. `requireAuth` blocks all endpoints except
+reset, but enforcement is gated by `FORCE_PASSWORD_CHANGE` (default `false`,
+set to `true` in `.env` to switch on at real deployment). When enabled,
+`requireAuth` blocks all endpoints except
 `POST /api/auth/change-password` and `POST /api/logout` with
 `403 { error: 'password_change_required' }`. Self-service change verifies the
 current password, writes a new bcrypt hash, clears the flag, bumps

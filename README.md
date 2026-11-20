@@ -33,8 +33,12 @@ npm run migrate:step4  # adds the atomic create_order RPC (idempotent)
 npm run verify:db      # read-only schema/data checks (never applies SQL or seeds)
 ```
 
-All staff are then forced to choose a new password at next login. See
-`SUPABASE_SETUP.md` § 1b and § 9 (one-time pre-handover audit purge).
+The forced-password-change gate is **off by default** for the current trial
+deployment. The DB flag is still set on existing accounts; switch it on later
+with `FORCE_PASSWORD_CHANGE=true` in `.env` — no code change or migration
+needed. Password change/reset stays available to the manager in the admin
+panel at all times. See `SUPABASE_SETUP.md` § 1b and § 9 (one-time pre-handover
+audit purge).
 
 ### Fresh project
 ```bash

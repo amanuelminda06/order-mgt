@@ -43,8 +43,9 @@ Supabase SQL editor is also safe. It changes only:
 
 - **Roles/users:** `user_role` becomes `('admin','cashier','waiter')`; existing
   `kitchen` users become `waiter`; every existing account gets
-  `must_change_password = true`, so each staff member chooses a new password on
-  next login.
+  `must_change_password = true`. The enforcement gate is off by default
+  (`FORCE_PASSWORD_CHANGE=false`) and can be enabled later with an env var —
+  see `SUPABASE_SETUP.md` § 1b.
 - **Orders:** drops `payments`, `order_items`, `orders`, `calc_order_total()` and
   `order_status`; recreates simplified `orders`/`order_items` with random
   `public_token`, staff-cancel columns, exact `NUMERIC(12,2)` totals and the
@@ -143,12 +144,15 @@ Removed from the product, not deferred:
 - **Session delivery:** login sets an `HttpOnly` `cd_session` cookie
   (`Secure` in production, `SameSite=Lax`, path `/`). `requireAuth` accepts the
   cookie or the `Authorization` header so API clients keep working.
-- **Forced password change:** all pre-migration accounts and admin-reset
-  accounts have `must_change_password = true`. Every endpoint except
-  `POST /api/auth/change-password` and `POST /api/logout` returns
-  `403 { error: 'password_change_required' }` for those users. The admin login
-  screen detects the flag and shows a "set a new password" form before entering
-  the dashboard; changing the password clears the flag and issues a fresh token.
+- **Forced password change (switchable):** all pre-migration accounts and
+  admin-reset accounts have `must_change_password = true`, but the gate is
+  **off by default** for the trial deployment. Set `FORCE_PASSWORD_CHANGE=true`
+  in `.env` and restart to enable it; no SQL change needed. When on, every
+  endpoint except `POST /api/auth/change-password` and `POST /api/logout`
+  returns `403 { error: 'password_change_required' }` for those users and the
+  admin login screen shows a "set a new password" form. Changing the password
+  clears the flag and issues a fresh token. When off, the manager can still use
+  header → **Change Password** and Staff → **Reset password** at any time.
 - **Reset:** admin-only `POST /api/auth/reset-password` generates a random
   temporary password, sets `must_change_password = true`, bumps
   `token_version` and audits `auth.password_reset`. The temporary password is

@@ -17,6 +17,10 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-do-not-use-in-production';
 // 'db' (default) or 'memory' (offline smoke fixture).
 const AUTH_STORE = process.env.AUTH_STORE || 'db';
+// Forced password change is OFF until the owner switches it on for the real
+// deployment (FORCE_PASSWORD_CHANGE=true). The DB flag and the change/reset
+// flows stay available so it can be enabled later without a code change.
+const FORCE_PASSWORD_CHANGE = process.env.FORCE_PASSWORD_CHANGE === 'true';
 
 function validateConfig() {
   const required = { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, JWT_SECRET };
@@ -39,5 +43,6 @@ module.exports = {
   SUPABASE_ANON_KEY,
   JWT_SECRET,
   AUTH_STORE,
+  FORCE_PASSWORD_CHANGE,
   validateConfig,
 };

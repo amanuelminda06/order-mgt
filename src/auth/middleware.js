@@ -3,6 +3,7 @@ const { verify } = require('./tokens');
 const { can } = require('./permissions');
 const { findUserById } = require('../db/accounts');
 const { asyncHandler } = require('../utils/async');
+const { FORCE_PASSWORD_CHANGE } = require('../config/env');
 
 function cookieValue(req, name) {
   const header = req.headers.cookie || '';
@@ -32,7 +33,8 @@ const requireAuth = asyncHandler(async (req, res, next) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   req.user = user;
-  if (user.must_change_password && !PASSWORD_CHANGE_ALLOWED.includes(req.path)) {
+  if (FORCE_PASSWORD_CHANGE && user.must_change_password &&
+      !PASSWORD_CHANGE_ALLOWED.includes(req.path)) {
     return res.status(403).json({ error: 'password_change_required' });
   }
   next();

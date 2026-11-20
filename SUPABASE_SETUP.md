@@ -132,8 +132,12 @@ Preserved: `menu_categories`, `menu_items`, `dining_tables`, other settings,
 `audit_log`, Storage and `order_number_seq`. If anything fails, restore from
 the backup schema before retrying.
 
-After migrating, each staff member must choose a new password at next login
-(the forced-change gate blocks all other endpoints).
+After migrating, existing accounts carry `must_change_password = true`, but the
+enforcement gate is **off by default** for the trial deployment. To require a
+new password at next login, set `FORCE_PASSWORD_CHANGE=true` in `.env` and
+restart — no migration needed. The manager can change their own password
+(header → **Change Password**) or reset any staff password (Staff tab →
+**Reset password**) regardless of the toggle.
 
 ---
 

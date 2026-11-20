@@ -2,7 +2,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { NODE_ENV } = require('../../config/env');
+const { NODE_ENV, FORCE_PASSWORD_CHANGE } = require('../../config/env');
 const { findUserByUsername, findUserById, setPassword, revokeTokens, appendAudit } = require('../../db/accounts');
 const { sign } = require('../../auth/tokens');
 const { requireAuth, requirePermission } = require('../../auth/middleware');
@@ -46,6 +46,7 @@ router.post('/api/login', asyncHandler(async (req, res) => {
     role: user.role,
     full_name: user.full_name,
     must_change_password: user.must_change_password,
+    force_password_change: FORCE_PASSWORD_CHANGE,
   });
 }));
 
