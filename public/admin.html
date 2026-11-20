@@ -88,6 +88,9 @@
     .upload-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
     .upload-row img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--bg)}
     .notice-line{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px}
+    .lang-toggle{display:flex;border:1px solid rgba(255,255,255,0.28);border-radius:6px;overflow:hidden;flex-shrink:0}
+    .lang-btn{background:transparent;color:rgba(255,255,255,0.72);border:none;padding:5px 10px;font-size:0.7rem;font-weight:700;letter-spacing:0.5px;cursor:pointer;font-family:var(--font-sans)}
+    .lang-btn.active{background:var(--accent);color:var(--text)}
     .staff-view{display:none}.staff-view.active{display:block}
     .cat-section-label{font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
     .cat-list{list-style:none;margin-bottom:12px}
@@ -149,6 +152,10 @@
         <h2 id="admin-header-title">Cupcake Delights Admin</h2>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
+        <div class="lang-toggle" role="group" aria-label="Interface language / የበይነገጽ ቋንቋ">
+          <button type="button" class="lang-btn active" data-lang="en" onclick="setAdminLang('en')">EN</button>
+          <button type="button" class="lang-btn" data-lang="am" onclick="setAdminLang('am')">AM</button>
+        </div>
         <span class="user-info" id="admin-user"></span>
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="openChangePassword()"><i class="fas fa-key"></i> Change Password</button>
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
@@ -298,6 +305,10 @@
     <div class="admin-header">
       <h2 id="staff-header-title">Live Orders</h2>
       <div style="display:flex;align-items:center;gap:12px">
+        <div class="lang-toggle" role="group" aria-label="Interface language / የበይነገጽ ቋንቋ">
+          <button type="button" class="lang-btn active" data-lang="en" onclick="setAdminLang('en')">EN</button>
+          <button type="button" class="lang-btn" data-lang="am" onclick="setAdminLang('am')">AM</button>
+        </div>
         <span class="user-info" id="staff-user-info"></span>
         <span class="role-badge" id="staff-role-badge"></span>
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
@@ -327,6 +338,102 @@
   <script>
     let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffRefreshInterval, allCategories=[], pendingLogin=null;
 
+    // ── Staff-facing EN / AM language toggle ──────────────────────
+    // Customer pages stay English-only; this switch only affects the admin and
+    // staff views. The choice is kept in localStorage so it survives reloads.
+    const ADMIN_I18N = {
+      'Admin Panel':'የአስተዳደር ፓነል', 'Username':'የተጠቃሚ ስም', 'Password':'የይለፍ ቃል',
+      'Sign In':'ግባ', 'Change Password':'የይለፍ ቃል ቀይር', 'Change my password':'የይለፍ ቃል ቀይር',
+      'Logout':'ውጣ', 'Cupcake Delights Admin':'የኬፕኬክ ደስታ አስተዳደር', 'Live Orders':'ቀጥታ ትዕዛዞች',
+      'Orders':'ትዕዛዞች', 'Menu':'ምናሌ', 'Categories':'ምድቦች', 'Tables & QR':'ጠረጴዛዎች እና QR',
+      'Settings':'ቅንብሮች', 'Staff':'ሰራተኞች', 'Analytics':'ትንተና', 'Audit':'ኦዲት',
+      'Newest orders first. Cancelling keeps a permanent reason on the order and receipt.':'አዲስ ትዕዛዞች መጀመሪያ ይታያሉ። ትዕዛዝ ሲሰረዝ ምክንያቱ በቋሚነት ይመዘገባል።',
+      'All':'ሁሉም', 'Open':'ክፍት', 'Cancelled':'ተሰርዟል', 'Order':'ትዕዛዝ', 'Table':'ጠረጴዛ',
+      'Items':'ዕቃዎች', 'Total':'ጠቅላላ', 'Notes / Reason':'ማስታወሻ / ምክንያት', 'Time':'ጊዜ',
+      'Actions':'ድርጊቶች', 'Cancel order':'ትዕዛዝ ሰርዝ',
+      'Menu Items':'የምናሌ ዕቃዎች', '+ Add Item':'+ ዕቃ አክል', 'Add Item':'ዕቃ አክል', 'Edit Item':'ዕቃ አርም',
+      'Food':'ምግብ', 'Drinks':'መጠጥ', 'Name':'ስም', 'Category':'ምድብ', 'Sub':'ንዑስ', 'Price':'ዋጋ',
+      'Available':'ይገኛል', 'Edit':'አርም', 'Delete':'ሰርዝ',
+      'Restaurant Categories':'የምግብ ምድቦች', 'Drinks Categories':'የመጠጥ ምድቦች',
+      'New restaurant category name...':'አዲስ የምግብ ምድብ ስም...', 'New drinks category name...':'አዲስ የመጠጥ ምድብ ስም...', 'Add':'አክል',
+      'Tables & QR Codes':'ጠረጴዛዎች እና QR ኮዶች', 'Print QR sheet (PDF)':'የ QR ሉህ አትም (PDF)',
+      'Add a table':'ጠረጴዛ አክል', 'Table number':'የጠረጴዛ ቁጥር', 'Name (optional)':'ስም (አማራጭ)',
+      'Capacity':'አቅም', 'Add table':'ጠረጴዛ አክል',
+      'Restaurant Settings':'የምግብ ቤት ቅንብሮች', 'Ordering':'ማዘዣ', 'Accepting orders':'ትዕዛዞችን መቀበል',
+      'When paused, customers can browse the menu but cannot place orders.':'ማዘዣ ሲቋረጥ ደንበኞች ምናሌውን ማየት ይችላሉ፣ ግን ማዘዣ ማስገባት አይችሉም።',
+      'Brand & currency':'ብራንድ እና ገንዘብ', 'Brand name':'የብራንድ ስም', 'Tagline':'መፈክር',
+      'Currency code':'የገንዘብ ኮድ', 'Currency symbol':'የገንዘብ ምልክት', 'Save details':'ዝርዝሮችን አስቀምጥ',
+      'VAT display':'የ VAT ማሳያ', 'DISPLAY ONLY':'ለማሳያ ብቻ', 'VAT mode':'የ VAT ሁነታ',
+      'Inclusive':'የተካተተ', 'Exclusive':'ያልተካተተ', 'VAT rate (%)':'የ VAT መጠን (%)',
+      'Save VAT display':'የ VAT ማሳያ አስቀምጥ', 'Notifications':'ማሳወቂያዎች',
+      'Telegram language':'የ Telegram ቋንቋ', 'Bilingual (EN + አማ)':'ሁለት ቋንቋ (EN + አማ)',
+      'Amharic':'አማርኛ', 'English':'እንግሊዝኛ', 'Save language':'ቋንቋ አስቀምጥ',
+      'Branding images':'የብራንድ ምስሎች', 'Logo':'አርማ', 'Hero image':'ዋና ምስል',
+      'Staff Management':'የሰራተኞች አስተዳደር', '+ Add Staff':'+ ሰራተኛ አክል', 'Add Staff':'ሰራተኛ አክል',
+      'Full Name':'ሙሉ ስም', 'Role':'ሚና', 'Active':'ንቁ', 'Deactivate':'አቦዝን', 'Activate':'አንቃ',
+      'Reset password':'የይለፍ ቃል ዳግም አስጀምር',
+      'Today':'ዛሬ', 'This Week':'ይህ ሳምንት', 'This Month':'ይህ ወር',
+      'Revenue Breakdown':'የገቢ መከፋፈል', 'Top Items':'በጣም የሚሸጡ ዕቃዎች', 'Hourly Orders':'በሰዓት የሚደረጉ ትዕዛዞች',
+      'Total Orders':'ጠቅላላ ትዕዛዞች', 'Total Revenue':'ጠቅላላ ገቢ', 'Avg Order:':'አማካይ ትዕዛዝ፡',
+      'orders':'ትዕዛዞች', 'No data yet':'ገኛ መረጃ የለም', 'No data':'መረጃ የለም', 'No activity recorded':'ምንም እንቅስቃሴ አልተመዘገበም',
+      'Audit log':'የኦዲት መዝገብ', 'Action':'ድርጊት', 'Actor':'አክተር', 'Entity':'አካል', 'Details':'ዝርዝሮች',
+      'Uncancelled orders, newest first · auto-refreshing':'ያልተሰረዙ ትዕዛዞች፣ አዲሱ መጀመሪያ · በራስ-ሰር ይታደሳል',
+      'Refresh':'አድስ', 'No orders at the moment':'በአሁኑ ጊዜ ምንም ትዕዛዝ የለም',
+      'Save':'አስቀምጥ', 'Cancel':'ሰርዝ', 'Description':'መግለጫ', 'Price (ETB)':'ዋጋ (ETB)',
+      'Photo':'ፎቶ', 'Subcategory':'ንዑስ ምድብ', 'Full name':'ሙሉ ስም',
+      'Delete?':'ሰርዝ?', 'Password changed successfully.':'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል።',
+      'A cancellation reason is required. The order was not cancelled.':'የመሰረዣ ምክንያት ያስፈልጋል። ትዕዛዝ አልተሰረዘም።',
+      'Enter a valid table number':'ትክክለኛ የጠረጴዛ ቁጥር ያስገቡ'
+    };
+    const i18nOriginal = new WeakMap();
+    let adminLang = localStorage.getItem('cd_admin_lang') === 'am' ? 'am' : 'en';
+
+    function tr(text) { return adminLang === 'am' ? (ADMIN_I18N[text] || text) : text; }
+
+    function translateNode(node) {
+      if (node.nodeType === 3) {
+        const raw = node.nodeValue;
+        // Restore from the stored English text first — once translated, the
+        // current text is Amharic and would no longer match the dictionary.
+        let original = i18nOriginal.get(node);
+        if (original === undefined) {
+          const key = raw.trim();
+          if (!key || !ADMIN_I18N[key]) return;
+          original = raw;
+          i18nOriginal.set(node, original);
+        }
+        const key = original.trim();
+        node.nodeValue = adminLang === 'am'
+          ? original.replace(key, ADMIN_I18N[key] || key)
+          : original;
+        return;
+      }
+      if (node.nodeType !== 1 || (node.hasAttribute && node.hasAttribute('data-no-i18n'))) return;
+      for (const child of Array.from(node.childNodes)) translateNode(child);
+    }
+
+    function applyAdminLang() {
+      document.documentElement.lang = adminLang;
+      ['login-page', 'admin', 'staff-view', 'modal-overlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) for (const child of Array.from(el.childNodes)) translateNode(child);
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === adminLang));
+    }
+
+    function setAdminLang(lang) {
+      adminLang = lang === 'am' ? 'am' : 'en';
+      localStorage.setItem('cd_admin_lang', adminLang);
+      applyAdminLang();
+    }
+
+    // Re-rendered tables/buttons inject fresh text nodes; translate on arrival.
+    new MutationObserver(records => {
+      for (const r of records) for (const n of r.addedNodes) translateNode(n);
+    }).observe(document.body, { childList: true, subtree: true });
+
+    applyAdminLang();
+
     function showLogin(err){
       token=''; userRole=''; pendingLogin=null;
       clearInterval(staffRefreshInterval);
@@ -353,7 +460,7 @@
         loadAll();
       } else {
         document.getElementById('staff-view').classList.add('active');
-        document.getElementById('staff-header-title').textContent='Live Orders · ትዕዛዞች';
+        document.getElementById('staff-header-title').textContent='Live Orders';
         loadStaffOrders();
         staffRefreshInterval=setInterval(loadStaffOrders,8000);
       }
@@ -414,7 +521,7 @@
         if(!res.ok){err.textContent=data.error||'Could not change password';err.style.display='block';return;}
         token=data.token;
         closeModal();
-        alert('Password changed successfully.');
+        alert(tr('Password changed successfully.'));
       };
       document.getElementById('modal-overlay').classList.add('active');
     }
@@ -460,7 +567,7 @@
       let reason=prompt(`Cancel order #${orderNo}? A reason is required and will be visible on the receipt.`);
       if(reason===null)return;
       reason=reason.trim();
-      if(!reason){alert('A cancellation reason is required. The order was not cancelled.');return;}
+      if(!reason){alert(tr('A cancellation reason is required. The order was not cancelled.'));return;}
       const res=await fetch(`/api/orders/${id}/cancel`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({reason})});
       const data=await res.json();
       if(!res.ok){alert(data.error||'Could not cancel order');return;}
@@ -475,7 +582,7 @@
       document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong>${i.name_am?` <span lang="am" style="color:var(--text-muted);font-weight:400">${i.name_am}</span>`:''}</td><td>${i.category==='bar'?'🥤 Drinks':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${Number(i.price).toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
     }
     async function toggleAvail(id,av){await fetch(`/api/menu/${id}/availability`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({available:av})});loadMenuTable();}
-    async function deleteItem(id){if(!confirm('Delete?'))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
+    async function deleteItem(id){if(!confirm(tr('Delete?')))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
 
     let allMenuItems=[];
     let editingImage='';
@@ -598,7 +705,7 @@ async function loadCategories(){
     async function createTable(){
       const numberInput=document.getElementById('new-table-number');
       const table_number=Number(numberInput.value);
-      if(!Number.isInteger(table_number)||table_number<=0){alert('Enter a valid table number');return;}
+      if(!Number.isInteger(table_number)||table_number<=0){alert(tr('Enter a valid table number'));return;}
       const name=document.getElementById('new-table-name').value.trim();
       const capacity=Number(document.getElementById('new-table-capacity').value)||4;
       const res=await fetch('/api/tables',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({table_number,name:name||undefined,capacity})});
