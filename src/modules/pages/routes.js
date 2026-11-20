@@ -16,6 +16,7 @@ const PUBLIC = path.join(__dirname, '..', '..', '..', 'public');
 router.get('/staff', (req, res) => res.redirect('/admin'));
 router.get('/admin', (req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
 router.get('/menu.html', (req, res) => res.sendFile(path.join(PUBLIC, 'menu.html')));
+router.get('/receipt/:token', (req, res) => res.sendFile(path.join(PUBLIC, 'receipt.html')));
 router.get('/', (req, res) => res.redirect('/menu.html?table=1'));
 router.get('*', (req, res) => res.redirect('/menu.html'));
 

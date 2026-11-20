@@ -1,29 +1,59 @@
-/**
- * Authentication middleware.
- *
- * LEGACY TOKEN FORMAT — deliberately unchanged in this step:
- *   token = base64("<username>:<timestamp>")
- * Verification decodes it and reads the substring before the first ":".
- * There is no signature, no expiry and no revocation. This is replaced by
- * HMAC + token_version in a later step; do not build new code on top of it.
- */
-const { staff } = require('../db/memory-store');
+/** Authentication + RBAC middleware (DB-backed, HMAC token). */
+const { verify } = require('./tokens');
+const { can } = require('./permissions');
+const { findUserById } = require('../db/accounts');
+const { asyncHandler } = require('../utils/async');
 
-function requireAuth(req, res, next) {
-  const token = req.headers['authorization'];
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+function cookieValue(req, name) {
+  const header = req.headers.cookie || '';
+  for (const part of header.split(';')) {
+    const [key, ...rest] = part.trim().split('=');
+    if (key === name) return decodeURIComponent(rest.join('='));
+  }
+  return null;
+}
 
-  const username = Buffer.from(token, 'base64').toString('utf-8').split(':')[0];
-  const user = staff.find((s) => s.username === username && s.active);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+// HttpOnly cookie is the primary browser credential; the header keeps API
+// clients working. SameSite=Lax on the cookie blocks cross-site POSTs.
+function tokenFromRequest(req) {
+  return cookieValue(req, 'cd_session') || req.headers['authorization'];
+}
 
+const PASSWORD_CHANGE_ALLOWED = ['/api/auth/change-password', '/api/logout'];
+
+const requireAuth = asyncHandler(async (req, res, next) => {
+  const payload = verify(tokenFromRequest(req));
+  if (!payload) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Reload on every request so role/deactivation changes take effect and a
+  // token_version bump revokes old sessions immediately.
+  const user = await findUserById(payload.uid);
+  if (!user || !user.active || user.token_version !== payload.ver) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   req.user = user;
+  if (user.must_change_password && !PASSWORD_CHANGE_ALLOWED.includes(req.path)) {
+    return res.status(403).json({ error: 'password_change_required' });
+  }
   next();
+});
+
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (!roles.includes(req.user.role)) return res.status(403).json({ error: 'Insufficient role' });
+    next();
+  };
 }
 
-function requireAdmin(req, res, next) {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
-  next();
+function requirePermission(action) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (!can(req.user.role, action)) return res.status(403).json({ error: 'Insufficient role' });
+    next();
+  };
 }
 
-module.exports = { requireAuth, requireAdmin };
+const requireAdmin = requireRole('admin');
+
+module.exports = { requireAuth, requireAdmin, requireRole, requirePermission, cookieValue, tokenFromRequest };

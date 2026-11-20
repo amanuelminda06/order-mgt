@@ -5,10 +5,11 @@
  * the app and (outside Vercel) starts listening. It exports the app so
  * tests can bind an ephemeral port.
  */
-require('./src/config/env');
+const config = require('./src/config/env');
+config.validateConfig();
 
 const createApp = require('./src/app');
-const { PORT } = require('./src/config/env');
+const { PORT } = config;
 
 const app = createApp();
 

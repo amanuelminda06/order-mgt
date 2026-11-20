@@ -1,50 +1,46 @@
-/** Analytics. Admin only (legacy behaviour). */
+/** Analytics: admin only, computed from committed DB orders. */
 const express = require('express');
-const { orders } = require('../../db/memory-store');
 const { requireAuth, requireAdmin } = require('../../auth/middleware');
+const { listOrders } = require('../../db/orders');
+const { toCents, fromCents } = require('../../utils/money');
+const { asyncHandler } = require('../../utils/async');
 
 const router = express.Router();
 
-router.get('/api/analytics', requireAuth, requireAdmin, (req, res) => {
+router.get('/api/analytics', requireAuth, requireAdmin, asyncHandler(async (req, res) => {
   const period = req.query.period || 'today';
-  let dateFilter = new Date();
-  if (period === 'week') dateFilter.setDate(dateFilter.getDate() - 7);
-  else if (period === 'month') dateFilter.setMonth(dateFilter.getMonth() - 1);
-  else dateFilter.setHours(0, 0, 0, 0);
+  const since = new Date();
+  if (period === 'week') since.setDate(since.getDate() - 7);
+  else if (period === 'month') since.setMonth(since.getMonth() - 1);
+  else since.setHours(0, 0, 0, 0);
 
-  const filtered = orders.filter((o) => new Date(o.created_at) >= dateFilter);
-  const totalOrders = filtered.length;
-  const totalRevenue = filtered.reduce((s, o) => s + o.total, 0);
-  const foodOrders = filtered.filter((o) => o.type === 'food');
-  const barOrders = filtered.filter((o) => o.type === 'bar');
-  const foodRevenue = foodOrders.reduce((s, o) => s + o.total, 0);
-  const barRevenue = barOrders.reduce((s, o) => s + o.total, 0);
+  const orders = (await listOrders({ limit: 1000 }))
+    .filter((o) => new Date(o.created_at) >= since);
 
+  let revenueCents = 0;
   const itemCounts = {};
-  filtered.forEach((o) => o.items.forEach((i) => { itemCounts[i.name] = (itemCounts[i.name] || 0) + i.quantity; }));
+  const hourly = {};
+  for (const order of orders) {
+    revenueCents += toCents(order.total);
+    hourly[new Date(order.created_at).getHours()] = (hourly[new Date(order.created_at).getHours()] || 0) + 1;
+    for (const item of order.items) {
+      itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
+    }
+  }
+
   const topItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-
-  const hourlyData = {};
-  filtered.forEach((o) => {
-    const h = new Date(o.created_at).getHours();
-    hourlyData[h] = (hourlyData[h] || 0) + 1;
-  });
-
-  const completed = filtered.filter((o) => o.status === 'completed');
-  const avgOrderValue = completed.length > 0 ? completed.reduce((s, o) => s + o.total, 0) / completed.length : 0;
-
   res.json({
-    totalOrders,
-    totalRevenue: totalRevenue.toFixed(2),
-    foodRevenue: foodRevenue.toFixed(2),
-    barRevenue: barRevenue.toFixed(2),
-    foodOrdersCount: foodOrders.length,
-    barOrdersCount: barOrders.length,
+    totalOrders: orders.length,
+    totalRevenue: fromCents(revenueCents),
+    foodRevenue: fromCents(revenueCents),
+    barRevenue: '0.00',
+    foodOrdersCount: orders.length,
+    barOrdersCount: 0,
     topItems,
-    hourlyData,
-    avgOrderValue: avgOrderValue.toFixed(2),
+    hourlyData: hourly,
+    avgOrderValue: orders.length ? fromCents(Math.round(revenueCents / orders.length)) : '0.00',
     period,
   });
-});
+}));
 
 module.exports = router;

@@ -7,14 +7,24 @@
     "start": "node server.js",
     "dev": "node server.js",
     "setup": "node scripts/db-setup.js",
+    "verify:db": "node scripts/verify-db.js",
     "reset": "node scripts/db-reset.js",
-    "seed:users": "node scripts/seed-users.js"
+    "reset:test": "ALLOW_TEST_RESET=1 node scripts/db-reset.js",
+    "backup": "node scripts/backup-db.js",
+    "migrate": "node scripts/migrate.js",
+    "migrate:step4": "node scripts/apply-sql.js sql/012_step4.sql",
+    "seed:users": "node scripts/seed-users.js",
+    "seed:smoke-users": "node scripts/seed-smoke-users.js",
+    "smoke": "node scripts/smoke.js",
+    "smoke:offline": "SMOKE_OFFLINE=1 node scripts/smoke.js",
+    "smoke:cleanup": "node scripts/smoke-cleanup.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
+    "pdfkit": "^0.21.0",
     "pg": "^8.23.1",
     "qrcode": "^1.5.4"
   }

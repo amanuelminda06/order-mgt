@@ -87,62 +87,10 @@
     .no-table h2{font-family:var(--font-serif);margin-bottom:8px}
     .no-table p{color:var(--text-muted);font-size:0.9rem}
 
-    .track-section{padding:16px;display:none}
-    .track-section.active{display:block}
-    .track-lookup{display:flex;gap:8px;margin-bottom:16px}
-    .track-lookup input{flex:1;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.95rem;font-family:var(--font-sans)}
-    .track-lookup button{padding:12px 20px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer}
-    .track-empty{text-align:center;padding:40px;color:var(--text-muted)}
-    .track-empty i{font-size:2rem;margin-bottom:8px;color:var(--primary)}
-
-    .order-status-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px}
-    .order-status-card .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .order-status-card .order-num{font-family:var(--font-serif);font-size:1.1rem;font-weight:700}
-    .status-badge{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;color:#fff}
-    .status-pending{background:var(--warning)}
-    .status-preparing{background:var(--bar)}
-    .status-ready{background:var(--success)}
-    .status-completed{background:#666}
-    .status-cancelled{background:var(--error)}
-
-    .order-detail-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.85rem;color:var(--text-muted)}
-    .order-detail-row span:last-child{font-weight:500;color:var(--text)}
-    .order-items-list{margin:12px 0;padding:12px;background:var(--bg);border-radius:var(--radius-sm)}
-    .order-items-list h5{font-size:0.8rem;color:var(--text-muted);margin-bottom:8px}
-    .order-item-row{display:flex;justify-content:space-between;padding:4px 0;font-size:0.85rem}
-
-    .amend-actions{display:flex;gap:8px;margin-top:12px}
-    .amend-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;font-weight:600;font-size:0.85rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
-    .amend-btn:hover{border-color:var(--primary);color:var(--primary)}
-    .amend-btn.cancel-btn{color:var(--error)}
-    .amend-btn.cancel-btn:hover{border-color:var(--error)}
-    .amend-btn.amend-btn-main{color:var(--warning)}
-    .amend-btn.amend-btn-main:hover{border-color:var(--warning)}
-
-    .pending-amend{background:#fff3e0;border:1px solid #ffe0b2;border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:0.82rem}
-    .pending-amend i{color:var(--warning);margin-right:4px}
-
-    .amend-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center}
-    .amend-modal.active{display:flex}
-    .amend-panel{background:var(--card);border-radius:var(--radius);width:90%;max-width:400px;padding:24px}
-    .amend-panel h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--dark2)}
-    .amend-type-select{display:flex;gap:8px;margin-bottom:12px}
-    .amend-type-opt{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all .2s}
-    .amend-type-opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-    .amend-panel textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:0.85rem;resize:none;min-height:80px}
-    .amend-panel .amend-panel-actions{display:flex;gap:8px;margin-top:16px}
-    .amend-panel .amend-panel-actions button{flex:1;padding:12px;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer}
-
-    .track-fab{position:fixed;bottom:90px;right:16px;z-index:150;background:var(--dark);color:#fff;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);display:none;align-items:center;justify-content:center;font-size:1.2rem;transition:transform .2s}
-    .track-fab:hover{transform:scale(1.1)}
-    .track-fab.visible{display:flex}
-    .track-fab-badge{position:absolute;top:-2px;right:-2px;background:var(--success);color:#fff;font-size:0.6rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--dark)}
-
-    .track-sheet{position:fixed;inset:0;z-index:350;background:rgba(0,0,0,0.5);display:none;align-items:flex-end;justify-content:center}
-    .track-sheet.active{display:flex}
-    .track-sheet-panel{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px 16px}
-    .track-sheet-panel h3{font-family:var(--font-serif);margin-bottom:16px;color:var(--dark2);display:flex;align-items:center;justify-content:space-between}
-    .track-sheet-panel h3 button{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:4px}
+    .ordering-notice{display:none;text-align:center;font-size:0.85rem;padding:12px 16px;background:rgba(201,138,30,0.14);color:var(--warning);font-weight:600;border-bottom:1px solid var(--border)}
+    .ordering-notice.visible{display:block}
+    .bilingual-sub{font-size:0.72rem;color:var(--text-muted);font-weight:400;display:block}
+    .menu-card-body h4 .am{font-size:0.78rem;font-weight:400;color:var(--text-muted);margin-left:4px}
 
     .order-confirm-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center}
     .order-confirm-modal.active{display:flex}
@@ -154,9 +102,11 @@
     .order-confirm-numbers .order-num-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.9rem}
     .order-confirm-numbers .order-num-item .label{color:var(--text-muted)}
     .order-confirm-numbers .order-num-item .value{font-weight:700;color:var(--primary);font-size:1rem}
-    .order-confirm-panel .track-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;background:rgba(145,73,48,0.08);padding:10px;border-radius:var(--radius-sm)}
-    .order-confirm-panel .track-hint i{color:var(--primary);margin-right:4px}
-    .order-confirm-panel .confirm-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.95rem}
+    .order-confirm-panel .receipt-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;background:rgba(145,73,48,0.08);padding:10px;border-radius:var(--radius-sm)}
+    .order-confirm-panel .receipt-hint i{color:var(--primary);margin-right:4px}
+    .order-confirm-panel .receipt-link{display:block;width:100%;padding:14px;margin-bottom:8px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:0.95rem;text-decoration:none}
+    .order-confirm-panel .receipt-link i{margin-right:6px}
+    .order-confirm-panel .confirm-btn{width:100%;padding:12px;background:var(--bg);color:var(--primary);border:1px solid var(--border);border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:0.9rem}
 
     .site-footer{background:var(--text);color:var(--bg);text-align:center;padding:28px 16px;margin-top:28px;font-size:0.85rem}
     .site-footer .footer-brand{font-family:var(--font-hand);font-size:1.5rem;color:var(--accent);margin-bottom:8px}
@@ -175,16 +125,19 @@
   </div>
 
   <div class="tabs" id="main-tabs" style="display:none">
-    <div class="tab active" data-tab="food"><i class="fas fa-utensils"></i>Restaurant</div>
-    <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Drinks</div>
+    <div class="tab active" data-tab="food"><i class="fas fa-utensils"></i>Restaurant <span class="bilingual-sub" lang="am">ምግብ</span></div>
+    <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Drinks <span class="bilingual-sub" lang="am">መጠጥ</span></div>
+  </div>
+  <div id="ordering-notice" class="ordering-notice">
+    <i class="fas fa-pause-circle"></i> Ordering is paused right now — please browse the menu, or ask our staff. <span lang="am">ማዘዣ ለጊዜው ተቋርጧል፤ ምናሌውን ማየት ይችላሉ።</span>
   </div>
   <div id="price-note" style="display:none;text-align:center;font-size:0.78rem;color:var(--text-muted);padding:10px 16px 0">
-    All prices are inclusive of 15% VAT and 10% service charge.
+    All prices are inclusive of VAT and service charge where applicable. <span lang="am">ዋጋዎች ተ.እ.ታና የአገልግሎት ክፍያን ሊያካትቱ ይችላሉ።</span>
   </div>
 
   <div id="food-section" class="menu-section active">
     <div class="section-header">
-      <h2>Restaurant Menu</h2>
+      <h2>Restaurant Menu <span class="bilingual-sub" lang="am">የምግብ ምናሌ</span></h2>
       <p>Fresh dishes crafted with love</p>
     </div>
     <div class="category-pills" id="food-pills"></div>
@@ -193,7 +146,7 @@
 
   <div id="bar-section" class="menu-section">
     <div class="section-header">
-      <h2>Drinks Menu</h2>
+      <h2>Drinks Menu <span class="bilingual-sub" lang="am">የመጠጥ ምናሌ</span></h2>
       <p>Coffee, tea, juices, smoothies & refreshers</p>
     </div>
     <div class="category-pills" id="bar-pills"></div>
@@ -209,38 +162,23 @@
   <div class="cart-bar" id="cart-bar">
     <div class="cart-bar-left">
       <div class="cart-count" id="cart-count">0</div>
-      <span>Your Order</span>
+      <span>Your Order <span class="bilingual-sub" lang="am">ትዕዛዝዎ</span></span>
     </div>
-    <button class="btn" onclick="openCart()">View Cart</button>
+    <button class="btn" onclick="openCart()">View Cart <span lang="am">ቅርጫት</span></button>
   </div>
 
   <div class="cart-modal" id="cart-modal">
     <div class="cart-panel">
-      <h3>Your Order</h3>
+      <h3>Your Order <span class="bilingual-sub" lang="am">ትዕዛዝዎ</span></h3>
       <div id="cart-items"></div>
       <div class="cart-total">
-        <span>Total</span>
+        <span>Total <span class="bilingual-sub" lang="am">ጠቅላላ</span></span>
         <span id="cart-total-val">ETB 0.00</span>
       </div>
-      <textarea class="notes-input" id="order-notes" placeholder="Special notes (allergies, preferences...)"></textarea>
+      <textarea class="notes-input" id="order-notes" placeholder="Special notes (allergies, preferences...) / ልዩ መመሪያዎች"></textarea>
       <div class="cart-actions">
-        <button class="btn btn-secondary" onclick="closeCart()">Cancel</button>
-        <button class="btn btn-primary" onclick="placeOrder()">Place Order</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="amend-modal" id="amend-modal">
-    <div class="amend-panel">
-      <h3 id="amend-title">Request Change</h3>
-      <div class="amend-type-select">
-        <div class="amend-type-opt active" data-type="amend" onclick="selectAmendType('amend',this)"><i class="fas fa-edit"></i> Amend Order</div>
-        <div class="amend-type-opt" data-type="cancel" onclick="selectAmendType('cancel',this)"><i class="fas fa-times"></i> Cancel Order</div>
-      </div>
-      <textarea id="amend-message" placeholder="Describe your requested change..."></textarea>
-      <div class="amend-panel-actions">
-        <button class="btn btn-secondary" onclick="closeAmendModal()" style="background:var(--bg);color:var(--text)">Back</button>
-        <button class="btn btn-primary" style="background:var(--primary);color:#fff" onclick="submitAmendment()">Submit Request</button>
+        <button class="btn btn-secondary" onclick="closeCart()">Back <span lang="am">ተመለስ</span></button>
+        <button class="btn btn-primary" id="place-order-btn" onclick="placeOrder()">Place Order <span lang="am">ይዘዙ</span></button>
       </div>
     </div>
   </div>
@@ -248,25 +186,14 @@
   <div class="toast" id="toast"></div>
 
   <div class="order-confirm-modal" id="order-confirm-modal">
-    <div class="order-confirm-panel">
+    <div class="order-confirm-panel" id="orderReceived">
       <div class="check-icon"><i class="fas fa-check"></i></div>
-      <h3>Order Placed!</h3>
+      <h3>Order Placed! <span class="bilingual-sub" lang="am">ትዕዛዝዎ ደርሷል</span></h3>
       <p>Your order has been sent to the kitchen.</p>
       <div class="order-confirm-numbers" id="order-confirm-numbers"></div>
-      <div class="track-hint"><i class="fas fa-info-circle"></i> Tap the <strong>track button</strong> at the bottom right to check your order status.</div>
-      <button class="confirm-btn" onclick="closeOrderConfirm()">Got It</button>
-    </div>
-  </div>
-
-  <button class="track-fab" id="track-fab" onclick="openTrackSheet()">
-    <i class="fas fa-clipboard-list"></i>
-    <span class="track-fab-badge" id="track-fab-badge">1</span>
-  </button>
-
-  <div class="track-sheet" id="track-sheet">
-    <div class="track-sheet-panel">
-      <h3><span>My Order</span> <button onclick="closeTrackSheet()"><i class="fas fa-times"></i></button></h3>
-      <div id="track-sheet-content"></div>
+      <div class="receipt-hint"><i class="fas fa-receipt"></i> Keep your private receipt link — it is the only way to view this order later. <span lang="am">የደረሰኝ አገናኝዎን ያስቀምጡ፤ ትዕዛዝዎን ለማየት ብቸኛው መንገድ ይህ ነው።</span></div>
+      <a class="receipt-link" id="receipt-link" href="#"><i class="fas fa-receipt"></i> View Receipt <span lang="am">ደረሰኝ ይመልከቱ</span></a>
+      <button class="confirm-btn" onclick="closeOrderConfirm()">Done <span lang="am">አልቋል</span></button>
     </div>
   </div>
 
@@ -286,20 +213,46 @@
     let barItems = [];
     let currentFoodCategory = 'all';
     let currentBarCategory = 'all';
-    let trackRefreshInterval = null;
+    let tableId = null;
+    let activeTableNumber = tableNumber;
+    let orderingEnabled = true;
+    let currencySymbol = 'ETB';
 
-    if (!tableNumber) {
-      document.getElementById('no-table').style.display = 'none';
-      document.getElementById('main-tabs').style.display = 'flex';
-      document.getElementById('price-note').style.display = 'block';
-      loadMenu();
-    } else {
-      document.getElementById('no-table').style.display = 'none';
-      document.getElementById('main-tabs').style.display = 'flex';
-      document.getElementById('price-note').style.display = 'block';
+    // Browsing always works; checkout is a separate, server-controlled switch.
+    document.getElementById('no-table').style.display = 'none';
+    document.getElementById('main-tabs').style.display = 'flex';
+    document.getElementById('price-note').style.display = 'block';
+    if (tableNumber) {
       document.getElementById('table-badge').style.display = 'inline-block';
       document.getElementById('table-number').textContent = tableNumber;
-      loadMenu();
+    }
+    loadMenu();
+    loadSettings();
+    resolveTable();
+
+    function fmtMoney(value) {
+      return currencySymbol + ' ' + Number(value || 0).toFixed(2);
+    }
+
+    function receiptStorageKey() {
+      return 'cd_receipt_table_' + (activeTableNumber || 'manual');
+    }
+
+    // The QR code carries table_number; the orders API needs the table id.
+    async function findTableId(number) {
+      try {
+        const res = await fetch('/api/tables');
+        if (!res.ok) return null;
+        const tables = await res.json();
+        const match = tables.find(t => String(t.table_number) === String(number))
+          || tables.find(t => String(t.id) === String(number));
+        return match ? match.id : null;
+      } catch (e) { return null; }
+    }
+
+    async function resolveTable() {
+      if (!tableNumber) return;
+      tableId = await findTableId(tableNumber);
     }
 
     document.querySelectorAll('.tab').forEach(tab => {
@@ -380,15 +333,16 @@
 
     function renderMenuItem(item) {
       const qty = getCartQty(item.id);
+      const image = item.image_path || item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
       return `<div class="menu-card ${item.available ? '' : 'unavailable'}">
-        <img class="menu-card-img" src="${item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}" alt="${item.name}" loading="lazy">
+        <img class="menu-card-img" src="${image}" alt="${item.name}" loading="lazy">
         <div class="menu-card-body">
           <div>
-            <h4>${item.name}</h4>
-            <p>${item.description || ''}</p>
+            <h4>${item.name}${item.name_am ? `<span class="am" lang="am">${item.name_am}</span>` : ''}</h4>
+            <p>${item.description || ''}${item.description_am ? `<span lang="am"> — ${item.description_am}</span>` : ''}</p>
           </div>
           <div class="menu-card-footer">
-            <span class="menu-price">ETB ${parseFloat(item.price).toFixed(2)}</span>
+            <span class="menu-price">${fmtMoney(item.price)}</span>
             ${qty > 0 ? `<div class="qty-control">
               <button class="qty-btn" onclick="updateCart(${item.id},-1)">-</button>
               <span class="qty-val">${qty}</span>
@@ -413,7 +367,7 @@
         existing.quantity += delta;
         if (existing.quantity <= 0) cart = cart.filter(c => c.menu_item_id !== itemId);
       } else if (delta > 0) {
-        cart.push({ menu_item_id: itemId, name: item.name, price: parseFloat(item.price), quantity: 1, type: item.category });
+        cart.push({ menu_item_id: itemId, name: item.name, price: Number(item.price), quantity: 1 });
       }
       updateCartBar();
       renderFoodGrid();
@@ -422,32 +376,36 @@
 
     function updateCartBar() {
       const count = cart.reduce((s, c) => s + c.quantity, 0);
-      const total = cart.reduce((s, c) => s + c.price * c.quantity, 0);
       document.getElementById('cart-count').textContent = count;
-      document.getElementById('cart-bar').classList.toggle('visible', count > 0);
+      document.getElementById('cart-bar').classList.toggle('visible', count > 0 && orderingEnabled);
     }
 
     function openCart() {
       const container = document.getElementById('cart-items');
-      if (cart.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">Your cart is empty</p>'; }
+      if (cart.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">Your cart is empty / ቅርጫትዎ ባዶ ነው</p>'; }
       else {
         container.innerHTML = cart.map(c => `
           <div class="cart-item">
             <div class="cart-item-info">
               <h5>${c.name}</h5>
-              <p>ETB ${c.price.toFixed(2)} each</p>
+              <p>${fmtMoney(c.price)} each</p>
             </div>
             <div class="qty-control">
               <button class="qty-btn" onclick="openCartUpdate(${c.menu_item_id},-1)">-</button>
               <span class="qty-val">${c.quantity}</span>
               <button class="qty-btn" onclick="openCartUpdate(${c.menu_item_id},1)">+</button>
             </div>
-            <span class="cart-item-price">ETB ${(c.price * c.quantity).toFixed(2)}</span>
+            <span class="cart-item-price">${fmtMoney(Number(c.price) * c.quantity)}</span>
             <button class="cart-item-remove" onclick="removeFromCart(${c.menu_item_id})"><i class="fas fa-trash"></i></button>
           </div>
         `).join('');
       }
-      document.getElementById('cart-total-val').textContent = 'ETB ' + cart.reduce((s, c) => s + c.price * c.quantity, 0).toFixed(2);
+      const total = cart.reduce((s, c) => s + Number(c.price) * c.quantity, 0);
+      document.getElementById('cart-total-val').textContent = fmtMoney(total);
+      const placeBtn = document.getElementById('place-order-btn');
+      placeBtn.disabled = !orderingEnabled;
+      placeBtn.style.opacity = orderingEnabled ? '1' : '0.5';
+      placeBtn.title = orderingEnabled ? '' : 'Ordering is currently paused';
       document.getElementById('cart-modal').classList.add('active');
     }
 
@@ -466,60 +424,60 @@
       openCart();
     }
 
-    let placedOrders = [];
-
     async function placeOrder() {
+      if (!orderingEnabled) { showToast('Ordering is currently paused', true); return; }
       if (cart.length === 0) return;
-      if (!tableNumber) {
+
+      if (!tableId) {
         const t = prompt('Enter your table number to place the order:');
-        if (!t || isNaN(parseInt(t))) { showToast('A valid table number is required', true); return; }
-        window._manualTable = parseInt(t);
+        if (!t || isNaN(parseInt(t, 10))) { showToast('A valid table number is required', true); return; }
+        activeTableNumber = t.trim();
+        tableId = await findTableId(activeTableNumber);
+        if (!tableId) { showToast('Table not found — please ask our staff', true); return; }
       }
-      const foodOrderItems = cart.filter(c => c.type === 'food');
-      const barOrderItems = cart.filter(c => c.type === 'bar');
+
+      // Prices are always computed by the server; the cart only sends ids and quantities.
+      const orderItems = cart.map(c => ({ menu_item_id: c.menu_item_id, quantity: c.quantity }));
       const notes = document.getElementById('order-notes').value;
-      placedOrders = [];
-
-      if (foodOrderItems.length > 0) {
-        await submitOrder('food', foodOrderItems, notes);
-      }
-      if (barOrderItems.length > 0) {
-        await submitOrder('bar', barOrderItems, notes);
-      }
-
-      cart = [];
-      updateCartBar();
-      renderFoodGrid();
-      renderBarGrid();
-      document.getElementById('order-notes').value = '';
-      closeCart();
-      saveTrackedOrders(placedOrders);
-      showOrderConfirm();
-    }
-
-    async function submitOrder(type, items, notes) {
-      const orderItems = items.map(i => ({ menu_item_id: i.menu_item_id, quantity: i.quantity }));
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ table_id: window._manualTable || parseInt(tableNumber), items: orderItems, type, special_notes: notes || null })
-      });
-      const data = await res.json();
-      if (data.success) {
-        placedOrders.push({ order_number: data.order_number, type, total: data.total, items: data.items });
+      const placeBtn = document.getElementById('place-order-btn');
+      placeBtn.disabled = true;
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ table_id: tableId, items: orderItems, special_notes: notes || null })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Could not place order');
+        sessionStorage.setItem(receiptStorageKey(), data.public_token);
+        cart = [];
+        updateCartBar();
+        renderFoodGrid();
+        renderBarGrid();
+        document.getElementById('order-notes').value = '';
+        closeCart();
+        showOrderConfirm(data);
+      } catch (e) {
+        showToast(e.message || 'Could not place order', true);
+      } finally {
+        placeBtn.disabled = !orderingEnabled;
       }
     }
 
-    function showOrderConfirm() {
+    function showOrderConfirm(order) {
       const container = document.getElementById('order-confirm-numbers');
-      container.innerHTML = placedOrders.map(o => `
+      container.innerHTML = `
         <div class="order-num-item">
-          <span class="label">${o.type === 'bar' ? '🥤 Drinks Order' : '🍽 Food Order'}</span>
-          <span class="value">${o.order_number}</span>
+          <span class="label">Order number / የትዕዛዝ ቁጥር</span>
+          <span class="value">#${order.order_no}</span>
         </div>
-      `).join('');
+        <div class="order-num-item">
+          <span class="label">Total / ጠቅላላ</span>
+          <span class="value">${fmtMoney(order.total)}</span>
+        </div>`;
+      const link = document.getElementById('receipt-link');
+      link.href = '/receipt/' + encodeURIComponent(order.public_token);
       document.getElementById('order-confirm-modal').classList.add('active');
-      showTrackFab();
     }
 
     function closeOrderConfirm() {
@@ -537,179 +495,18 @@
       try {
         const res = await fetch('/api/settings');
         const s = await res.json();
-        const brandName = s.restaurant_name || s.brand_name;
+        const brandName = s.brand_name || s.restaurant_name;
         if (brandName) document.getElementById('restaurant-name').textContent = brandName;
         if (s.tagline) document.getElementById('restaurant-tagline').textContent = s.tagline;
-      } catch(e) {}
-    }
-    loadSettings();
-
-    // ── Floating Track Button & Tracking Sheet ──────────────────
-
-    function getTrackedOrders() {
-      try { return JSON.parse(sessionStorage.getItem('trackedOrders') || '[]'); } catch(e) { return []; }
-    }
-
-    function saveTrackedOrders(orders) {
-      const existing = getTrackedOrders();
-      orders.forEach(o => {
-        if (!existing.find(e => e.order_number === o.order_number)) {
-          existing.push({ order_number: o.order_number, type: o.type });
-        }
-      });
-      sessionStorage.setItem('trackedOrders', JSON.stringify(existing));
+        if (s.currency_symbol) currencySymbol = s.currency_symbol;
+        orderingEnabled = s.ordering_enabled !== false && String(s.ordering_enabled) !== 'false';
+        document.getElementById('ordering-notice').classList.toggle('visible', !orderingEnabled);
+        const placeBtn = document.getElementById('place-order-btn');
+        placeBtn.disabled = !orderingEnabled;
+        updateCartBar();
+      } catch (e) { /* Defaults are safe: ordering allowed until settings load. */ }
     }
 
-    function restoreTrackedOrders() {
-      const orders = getTrackedOrders();
-      if (orders.length > 0) showTrackFab();
-    }
-
-    function showTrackFab() {
-      const orders = getTrackedOrders();
-      if (orders.length === 0) return;
-      const fab = document.getElementById('track-fab');
-      const badge = document.getElementById('track-fab-badge');
-      badge.textContent = orders.length;
-      fab.classList.add('visible');
-    }
-
-    async function openTrackSheet() {
-      const orders = getTrackedOrders();
-      if (orders.length === 0) return;
-      const container = document.getElementById('track-sheet-content');
-      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-      document.getElementById('track-sheet').classList.add('active');
-
-      await renderTrackSheet();
-      trackRefreshInterval = setInterval(renderTrackSheet, 10000);
-    }
-
-    function closeTrackSheet() {
-      document.getElementById('track-sheet').classList.remove('active');
-      if (trackRefreshInterval) { clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
-    }
-
-    async function renderTrackSheet() {
-      const tracked = getTrackedOrders();
-      const container = document.getElementById('track-sheet-content');
-      if (tracked.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">No active orders</p>';
-        document.getElementById('track-fab').classList.remove('visible');
-        return;
-      }
-
-      let html = '';
-      let activeCount = 0;
-
-      for (const t of tracked) {
-        try {
-          const res = await fetch('/api/track/' + encodeURIComponent(t.order_number));
-          if (!res.ok) continue;
-          const order = await res.json();
-          if (['completed', 'cancelled'].includes(order.status)) continue;
-          activeCount++;
-
-          const statusLabel = order.status.charAt(0).toUpperCase() + order.status.slice(1);
-          const statusClass = 'status-' + order.status;
-          const progress = { pending: 25, preparing: 50, ready: 75 };
-          const pct = progress[order.status] || 0;
-          const canAmend = !['completed', 'cancelled'].includes(order.status);
-          const hasPending = order.pending_amendments && order.pending_amendments.length > 0;
-
-          html += `
-            <div class="order-status-card">
-              <div class="order-header">
-                <span class="order-num">${order.order_number}</span>
-                <span class="status-badge ${statusClass}">${statusLabel}</span>
-              </div>
-              <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px">
-                <div style="height:100%;width:${pct}%;background:var(--primary);border-radius:3px;transition:width .5s"></div>
-              </div>
-              <div class="order-detail-row"><span>Table</span><span>${order.table_name}</span></div>
-              <div class="order-detail-row"><span>Type</span><span>${order.type === 'bar' ? 'Drinks' : 'Restaurant'}</span></div>
-              <div class="order-detail-row"><span>Placed</span><span>${new Date(order.created_at).toLocaleString()}</span></div>
-              <div class="order-detail-row"><span>Total</span><span>ETB ${parseFloat(order.total).toFixed(2)}</span></div>
-              ${order.special_notes ? `<div class="order-detail-row"><span>Notes</span><span>${order.special_notes}</span></div>` : ''}
-              <div class="order-items-list">
-                <h5>Items Ordered</h5>
-                ${order.items.map(i => `<div class="order-item-row"><span>${i.quantity}x ${i.name}</span><span>ETB ${(parseFloat(i.price) * i.quantity).toFixed(2)}</span></div>`).join('')}
-              </div>`;
-
-          if (hasPending) {
-            const pa = order.pending_amendments[0];
-            html += `<div class="pending-amend"><i class="fas fa-clock"></i> Pending ${pa.type} request: "${pa.message}" — awaiting staff review</div>`;
-          }
-
-          if (canAmend && !hasPending) {
-            html += `<div class="amend-actions">
-              <button class="amend-btn amend-btn-main" onclick="openAmendModal('${order.order_number}','amend')"><i class="fas fa-edit"></i> Change</button>
-              <button class="amend-btn cancel-btn" onclick="openAmendModal('${order.order_number}','cancel')"><i class="fas fa-times"></i> Cancel</button>
-            </div>`;
-          }
-
-          html += `</div>`;
-        } catch(e) {}
-      }
-
-      if (activeCount === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">All orders are completed or cancelled</p>';
-        sessionStorage.removeItem('trackedOrders');
-        document.getElementById('track-fab').classList.remove('visible');
-        if (trackRefreshInterval) { clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
-      } else {
-        container.innerHTML = html;
-      }
-    }
-
-    // ── Amendments ──────────────────
-
-    let amendTargetOrder = null;
-    let amendType = 'amend';
-
-    function openAmendModal(orderNumber, type) {
-      amendTargetOrder = orderNumber;
-      amendType = type;
-      document.getElementById('amend-title').textContent = type === 'cancel' ? 'Cancel Order' : 'Request Change';
-      document.getElementById('amend-message').placeholder = type === 'cancel'
-        ? 'Reason for cancellation...'
-        : 'Describe your requested change (e.g. change quantity, swap item, update notes)...';
-      document.getElementById('amend-message').value = '';
-      document.getElementById('amend-modal').classList.add('active');
-    }
-
-    function closeAmendModal() { document.getElementById('amend-modal').classList.remove('active'); }
-
-    function selectAmendType(type, el) {
-      amendType = type;
-      document.querySelectorAll('.amend-type-opt').forEach(o => o.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('amend-title').textContent = type === 'cancel' ? 'Cancel Order' : 'Request Change';
-      document.getElementById('amend-message').placeholder = type === 'cancel'
-        ? 'Reason for cancellation...'
-        : 'Describe your requested change...';
-    }
-
-    async function submitAmendment() {
-      const message = document.getElementById('amend-message').value.trim();
-      if (!message) { showToast('Please enter a message', true); return; }
-      if (!amendTargetOrder) return;
-
-      try {
-        const res = await fetch('/api/amendments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_number: amendTargetOrder, type: amendType, message })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        closeAmendModal();
-        showToast('Request submitted! Staff will review shortly.');
-        await renderTrackSheet();
-      } catch (e) {
-        showToast(e.message || 'Failed to submit', true);
-      }
-    }
   </script>
 </body>
 </html>

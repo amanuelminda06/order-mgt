@@ -17,7 +17,11 @@ const headers = {
 
 async function request(method, path, body) {
   const opts = { method, headers: { ...headers } };
-  if (body && method !== 'GET') opts.body = JSON.stringify(body);
+  if (body && method !== 'GET') {
+    opts.body = JSON.stringify(body);
+    // PostgREST returns the affected row only when asked; writes need ids back.
+    opts.headers.Prefer = 'return=representation';
+  }
   const res = await fetch(`${REST}/${path}`, opts);
   if (!res.ok) {
     const text = await res.text();
@@ -31,12 +35,14 @@ async function request(method, path, body) {
  * SELECT rows from a table.
  * @param {string} table
  * @param {Object} filters - key=value pairs applied as ?col=eq.val filters
- * @param {string} select - columns to select
+ * @param {string} columns - columns to select
+ * @param {{order?: string|null}} options - pass order:null for tables without
+ *   a sort_order column (users, audit_log, orders, settings)
  */
-async function select(table, filters = {}, select = '*') {
-  const qs = new URLSearchParams({ select });
+async function select(table, filters = {}, columns = '*', { order = 'sort_order.asc' } = {}) {
+  const qs = new URLSearchParams({ select: columns });
   for (const [k, v] of Object.entries(filters)) qs.append(k, `eq.${v}`);
-  qs.append('order', 'sort_order.asc');
+  if (order) qs.append('order', order);
   return request('GET', `${table}?${qs}`);
 }
 
@@ -82,4 +88,24 @@ async function upload(bucket, filename, buffer, contentType) {
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filename}`;
 }
 
-module.exports = { select, insert, update, del: del, upload, REST, STORAGE };
+/** UPSERT one or more rows by a unique column (defaults to id). */
+async function upsert(table, data, onConflict = 'id') {
+  const opts = {
+    method: 'POST',
+    headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(data),
+  };
+  const res = await fetch(`${REST}/${table}?on_conflict=${onConflict}`, opts);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase upsert ${table}: HTTP ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+/** Call a Postgres function through PostgREST RPC. */
+async function rpc(name, args = {}) {
+  return request('POST', `rpc/${name}`, args);
+}
+
+module.exports = { select, insert, update, del: del, upsert, upload, rpc, REST, STORAGE };

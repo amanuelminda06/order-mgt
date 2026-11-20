@@ -12,8 +12,6 @@
  *
  * Do not add new features on top of this file.
  */
-const bcrypt = require('bcryptjs');
-
 // ── Counters ──────────────────────────────────────────────
 // Exported as an object so every module mutates the SAME values.
 const counters = {
@@ -179,14 +177,13 @@ const menuItems = [
   { id:114, name:'Ambo Water', description:'', price:140, category:'bar', subcategory:'Soft Drinks', available:true, image:'/uploads/menu/food-soft-drinks.jpg' },
 ];
 
-// ── Staff ─────────────────────────────────────────────────
-// Mirrors sql/002_seed.sql exactly (same usernames + passwords), so a
-// login works the same before and after the read paths move to Supabase.
+// ── Staff fixtures (no credentials live in source) ────────
+// Passwords come from .env.test / a real DB; this array only carries the
+// display data used by the offline REST stub.
 const staff = [
-  { id:1, username:'admin',    password:bcrypt.hashSync('Admin123',10),   full_name:'Administrator', role:'admin',   active:true },
-  { id:2, username:'waiter1',  password:bcrypt.hashSync('Waiter123',10),  full_name:'Waiter One',    role:'waiter',  active:true },
-  { id:3, username:'kitchen1', password:bcrypt.hashSync('Kitchen123',10), full_name:'Kitchen One',   role:'kitchen', active:true },
-  { id:4, username:'cashier1', password:bcrypt.hashSync('Cashier123',10), full_name:'Cashier One',   role:'cashier', active:true },
+  { id:1, username:'smoke_admin',   full_name:'Smoke Admin',   role:'admin',   active:true, token_version:0 },
+  { id:2, username:'smoke_waiter',  full_name:'Smoke Waiter',  role:'waiter',  active:true, token_version:0 },
+  { id:3, username:'smoke_cashier', full_name:'Smoke Cashier', role:'cashier', active:true, token_version:0 },
 ];
 
 // ── Categories ────────────────────────────────────────────
@@ -224,6 +221,9 @@ const settings = {
   phone_alt: '+251 91 112 1119',
   address: 'Bole Medihanialem, Robel Plaza, Ground Floor',
   email: '[PLACEHOLDER]',
+  ordering_enabled: true,
+  telegram_language: 'bilingual',
+  default_language: 'en',
 };
 
 // ── Helpers bound to this store ───────────────────────────

@@ -11,10 +11,12 @@ insert into settings (key, value) values
   ('currency_code', '"ETB"'),
   ('currency_symbol', '"ETB"'),
   ('currency_position', '"before"'),
+  -- Display-only: totals are computed from menu prices, VAT is not added.
   ('vat_mode', '"inclusive"'),
   ('vat_rate', '15'),
   ('default_language', '"en"'),
-  ('require_waiter_confirmation', 'true'),
+  ('ordering_enabled', 'true'),
+  ('telegram_language', '"bilingual"'),
   ('logo_path', 'null'),
   ('hero_path', 'null')
 on conflict (key) do nothing;

@@ -1,504 +1,359 @@
-# Supabase Setup — Cupcake Delight
+# Supabase Setup — Cupcake Delights (simplified scope)
 
-Step-by-step provisioning guide for the Cupcake Delight trial system.
-Run the steps in order. Everything here is idempotent where possible.
+Run these steps in order. The SQL files are idempotent where possible.
 
-> **Status:** schema reflects the FINAL spec (amendments removed, no
-> `public_token`, `token_version`-based revocation, no `must_change_password`).
+> **Scope:** 8 tables, 3 roles (`admin`, `cashier`, `waiter`). No order status
+> flow, no payments, no kitchen role, no `require_waiter_confirmation`. VAT is
+> **display only** (`vat_mode`, `vat_rate`) and is never added to totals.
+>
+> **Existing live project:** use the in-place migration in § 1b. **Never run
+> `npm run reset` against the live project** — it holds the real menu,
+> categories, settings and table tokens. Reset is test-only (§ 6).
 
 ---
 
 ## 0. Prerequisites
 
-- A Supabase project (you create it) → **Project URL**, **Service Role Key**, **Anon Key**
-- `.env` in the project root:
+Supabase project → **Project URL**, **Service Role Key**, **Anon Key**. `.env`:
 
 ```bash
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<service-role key>   # server only, never exposed
-SUPABASE_ANON_KEY=<anon key>                   # only if client-side reads are added later
-BASE_URL=https://<your-vercel-domain>          # used to build QR codes
+SUPABASE_ANON_KEY=<anon key>
+DATABASE_URL=postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com:6543/postgres
+                                               # transaction pooler for backup/migrate/verify
+BASE_URL=https://<your-vercel-domain>
+JWT_SECRET=<random 32+ bytes>                  # HMAC session tokens
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
-JWT_SECRET=<random 32+ bytes>                  # for HMAC session tokens
+ADMIN_INITIAL_PASSWORD=
+WAITER_INITIAL_PASSWORD=
+CASHIER_INITIAL_PASSWORD=
 ```
 
-Never commit `.env`. The service-role key bypasses RLS — it must only ever
-live server-side.
+`DATABASE_URL` (or `SUPABASE_DB_URL`) is required only for `npm run backup`,
+`npm run migrate`, `npm run verify:db`, `npm run setup` and the test scripts.
+Use the **transaction pooler** connection string (port 6543) — the direct host
+`db.<ref>.supabase.co:5432` may be IPv6-only. `scripts/db-client.js` enables TLS
+with `rejectUnauthorized: false` for Supabase hosts because the pooler presents
+a self-signed certificate. Never commit `.env` or `.env.test`. The service-role
+key bypasses RLS and must stay server-side.
 
 ### Telegram bot
 
-The bot token is verified (`getMe` → `@Cupcakedelight_orders_bot`). To get
-the **chat id**:
-
-1. Open the bot in Telegram and press **Start**, or add it to your staff
-   group (it cannot read group messages unless it is an admin for some
-   group types).
-2. Run:
+The bot token is verified (`getMe` → `@Cupcakedelight_orders_bot`). Press
+**Start** in the bot (or add it to a staff group as admin), then:
 
 ```bash
 curl "https://api.telegram.org/bot<TOKEN>/getUpdates"
 ```
 
-3. Copy `"chat":{"id":…}` into `TELEGRAM_CHAT_ID`. For a group this is a
-   negative number such as `-1001234567890`.
-
-Until `TELEGRAM_CHAT_ID` is set, order notifications are silently skipped
-(the feature is a no-op, never an error).
+Copy `"chat":{"id":…}` into `TELEGRAM_CHAT_ID` (group ids are negative). When
+unset, notifications are a no-op — **never an order failure**.
 
 ---
 
-## 1. Create the schema
+## 1. Schema (fresh project only)
 
-Supabase Dashboard → **SQL Editor** → New query → paste `sql/001_schema.sql` → Run.
+Dashboard → SQL Editor → paste `sql/001_schema.sql` → Run. Summary:
+
+| Table | Purpose |
+|---|---|
+| `users` | staff accounts; `role user_role`, `must_change_password`, `token_version` |
+| `menu_categories` / `menu_items` | menu, including `name_am` / `description_am` |
+| `dining_tables` | 30 tables, random `qr_token`, deactivate-only |
+| `orders` | received orders + staff cancellation, random `public_token` |
+| `order_items` | name/price snapshots for the receipt |
+| `audit_log` | append-only staff/action trail |
+| `settings` | brand, currency, `default_language`, `ordering_enabled`, `telegram_language`, `vat_mode`, `vat_rate` |
+
+Key DDL (full definition is in the file):
 
 ```sql
--- ── 1. Users (staff) ─────────────────────────────────────────────
-create type user_role as enum ('admin', 'waiter', 'kitchen', 'cashier');
-
-create table users (
-  id                 bigserial primary key,
-  username           text not null unique,
-  password_hash      text not null,
-  full_name          text not null,
-  role               user_role not null,
-  active             boolean not null default true,
-  -- revocation: bumped on password change/reset, deactivation, logout
-  token_version      integer not null default 0,
-  password_changed_at timestamptz not null default now(),
-  created_at         timestamptz not null default now(),
-  updated_at         timestamptz not null default now()
-);
-
--- ── 2. Menu categories ───────────────────────────────────────────
-create type menu_section as enum ('food', 'drink', 'other');
-
-create table menu_categories (
-  id         bigserial primary key,
-  name       text not null,
-  name_am    text,                          -- Amharic
-  section    menu_section not null default 'food',
-  sort_order integer not null default 0,
-  active     boolean not null default true,
-  created_at timestamptz not null default now(),
-  unique (name, section)
-);
-
--- ── 3. Menu items ────────────────────────────────────────────────
-create table menu_items (
-  id             bigserial primary key,
-  name           text not null,
-  name_am        text,
-  description    text,
-  description_am text,
-  category_id    bigint not null references menu_categories(id) on delete restrict,
-  price          numeric(12,2) not null check (price >= 0),
-  available      boolean not null default true,
-  image_path     text,                      -- Supabase Storage path, NOT a URL
-  sort_order     integer not null default 0,
-  created_at     timestamptz not null default now(),
-  updated_at     timestamptz not null default now()
-);
-create index menu_items_category_idx on menu_items (category_id);
-
--- ── 4. Tables (dine-in) ──────────────────────────────────────────
--- Deactivate/reactivate only: there is intentionally NO delete endpoint.
-create table tables (
-  id           bigserial primary key,
-  table_number integer not null unique,
-  name         text not null,
-  capacity     integer not null default 4,
-  qr_token     text not null unique,        -- random 32-char hex
-  active       boolean not null default true,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now()
-);
-
--- ── 5. Order number sequence (plain, starts at 1001) ─────────────
--- A normal Postgres SEQUENCE: monotonically increasing, never wraps.
+create type user_role as enum ('admin','cashier','waiter');
 create sequence order_number_seq start 1001 minvalue 1001;
-
--- ── 6. Orders ────────────────────────────────────────────────────
-create type order_status as enum
-  ('pending', 'preparing', 'ready', 'completed', 'cancelled');
 
 create table orders (
   id            bigserial primary key,
-  -- Sequential from 1001, never wraps, therefore unique.
-  order_no      integer not null unique,
-  table_id      bigint not null references tables(id) on delete restrict,
-  status        order_status not null default 'pending',
-
-  -- Money: all arithmetic happens in SQL on NUMERIC, never in JS.
+  order_no      integer not null unique default nextval('order_number_seq'),
+  public_token  text not null unique default encode(gen_random_bytes(24), 'hex'),
+  table_id      bigint not null references dining_tables(id) on delete restrict,
   currency      text not null default 'ETB',
-  subtotal      numeric(12,2) not null default 0 check (subtotal >= 0),
-  -- per-order VAT snapshot (settings may change later)
-  vat_mode      text not null check (vat_mode in ('inclusive','exclusive')),
-  vat_rate      numeric(5,2) not null default 15 check (vat_rate >= 0),
-  vat_amount    numeric(12,2) not null default 0 check (vat_amount >= 0),
-  total         numeric(12,2) not null default 0 check (total >= 0),
-
+  total         numeric(12,2) not null check (total >= 0),
   special_notes text,
-  -- cancellation (replaces the old amendments flow)
   cancel_reason text,
   cancelled_by  bigint references users(id) on delete set null,
-
-  placed_by     bigint references users(id) on delete set null,  -- null = QR customer
-  updated_by    bigint references users(id) on delete set null,
+  cancelled_at  timestamptz,
+  placed_by     bigint references users(id) on delete set null,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
-
-  check (status <> 'cancelled' or cancel_reason is not null)
+  check (cancel_reason is null or btrim(cancel_reason) <> ''),
+  check ((cancel_reason is null) = (cancelled_at is null))
 );
-create index orders_table_idx  on orders (table_id);
-create index orders_status_idx on orders (status);
--- order_no: no extra index needed, the UNIQUE constraint indexes it
 
--- ── 7. Order items (price/name snapshotted at order time) ────────
 create table order_items (
-  id              bigserial primary key,
-  order_id        bigint not null references orders(id) on delete cascade,
-  menu_item_id    bigint references menu_items(id) on delete set null,
-  name_snapshot   text not null,
-  name_am_snapshot text,
-  price_snapshot  numeric(12,2) not null check (price_snapshot >= 0),
-  quantity        integer not null check (quantity > 0),
-  line_total      numeric(12,2) not null check (line_total >= 0),
-  notes           text
-);
-create index order_items_order_idx on order_items (order_id);
-
--- ── 8. Audit log (every staff mutation) ──────────────────────────
-create table audit_log (
-  id             bigserial primary key,
-  actor_user_id  bigint references users(id) on delete set null,
-  actor_role     text,
-  action         text not null,             -- e.g. 'order.cancel', 'user.password_reset'
-  entity_type    text not null,             -- 'order', 'user', 'menu_item', ...
-  entity_id      text not null,
-  before         jsonb,
-  after          jsonb,
-  ip             text,
-  created_at     timestamptz not null default now()
-);
-create index audit_log_entity_idx on audit_log (entity_type, entity_id);
-create index audit_log_actor_idx  on audit_log (actor_user_id, created_at desc);
-
--- ── 9. Settings (key/value, currency + VAT live here) ────────────
-create table settings (
-  key         text primary key,
-  value       jsonb not null,
-  updated_by  bigint references users(id) on delete set null,
-  updated_at  timestamptz not null default now()
+  ...
+  price_snapshot numeric(12,2) not null check (price_snapshot >= 0),
+  quantity       integer not null check (quantity > 0),
+  line_total     numeric(12,2) not null
+    check (line_total = round(price_snapshot * quantity, 2))
 );
 ```
 
-**Notes on deliberate omissions**
-- No `order_amendments` table — amendments were removed from the spec.
-- No `public_token` / `qr_token` on orders — customers track by `order_no`.
-- No `must_change_password` column — password changes are never forced.
-- `orders.order_no` **is** unique: the sequence starts at 1001 and never wraps.
+Deliberate omissions: **no** `order_status`, `payments`, VAT columns on
+`orders`, `calc_order_total()`, `order_amendments`,
+`require_waiter_confirmation`, or `kitchen` role. `vat_mode`/`vat_rate` live in
+`settings` as display values only. `audit_log` has triggers that reject UPDATE
+and DELETE (`audit_log_no_update`, `audit_log_no_delete`).
 
 ---
 
-## 2. Enable RLS
+## 1b. In-place migration (existing live project)
 
-```sql
-alter table users            enable row level security;
-alter table menu_categories  enable row level security;
-alter table menu_items       enable row level security;
-alter table tables           enable row level security;
-alter table orders           enable row level security;
-alter table order_items      enable row level security;
-alter table audit_log        enable row level security;
-alter table settings         enable row level security;
--- order_number_seq is a SEQUENCE, not a table: RLS does not apply to it.
--- (Everything else above is a table and must have RLS enabled.)
+Back up first, then migrate. Both steps need `DATABASE_URL`:
 
--- With the service-role key, RLS is bypassed server-side, so no policies
--- are needed for the API. These two policies only matter if you later add
--- client-side reads with the anon key:
-
-create policy "public menu read"
-  on menu_items for select using (available = true);
-create policy "public categories read"
-  on menu_categories for select using (active = true);
+```bash
+npm run backup    # creates backup_pre_simplify_YYYYMMDD_HH24MI
+npm run migrate   # applies sql/010_simplify.sql
 ```
 
-If you do **not** plan any client-side Supabase access, you can skip the
-policies and keep RLS on with zero policies (deny-all for anon) — that is the
-safer default.
+The migration snapshots affected tables into a timestamped schema **before**
+any destructive DDL, then:
+
+- replaces `user_role` with `('admin','cashier','waiter')` (`kitchen` →
+  `waiter`) and adds `must_change_password = true` for every existing account;
+- drops `payments`, `order_items`, `orders`, `calc_order_total()` and
+  `order_status`, then recreates the simplified orders with `public_token`,
+  cancel fields, exact `NUMERIC(12,2)` totals and the `line_total` check;
+- deletes `require_waiter_confirmation` and upserts `ordering_enabled`,
+  `telegram_language`, `vat_mode`, `vat_rate` (existing values are kept).
+
+Preserved: `menu_categories`, `menu_items`, `dining_tables`, other settings,
+`audit_log`, Storage and `order_number_seq`. If anything fails, restore from
+the backup schema before retrying.
+
+After migrating, each staff member must choose a new password at next login
+(the forced-change gate blocks all other endpoints).
+
+---
+
+## 2. RLS
+
+All 8 tables have RLS enabled; the server uses the service-role key, so no
+policies are needed. Anon-key policies may be added later for public menu reads
+if a browser client is introduced. (The sequence needs no RLS.)
 
 ---
 
 ## 3. Storage buckets
 
-Dashboard → **Storage** → New bucket, three times:
-
-| Bucket | Public URL | Allowed types | Max size | Purpose |
-|---|---|---|---|---|
-| `logo` | public read | png, jpg, svg, webp | 2 MB | Brand logo |
-| `hero` | public read | png, jpg, webp | 5 MB | Hero background |
-| `menu-items` | public read | png, jpg, webp | 5 MB | Menu item photos |
-
-Then **Storage → Policies** — allow authenticated/service writes only:
-
-```sql
-create policy "admin upload logo"
-  on storage.objects for insert to authenticated
-  with check (bucket_id = 'logo');
-create policy "admin upload hero"
-  on storage.objects for insert to authenticated
-  with check (bucket_id = 'hero');
-create policy "admin upload menu items"
-  on storage.objects for insert to authenticated
-  with check (bucket_id = 'menu-items');
-create policy "public read assets"
-  on storage.objects for select
-  using (bucket_id in ('logo','hero','menu-items'));
-```
-
-**Naming convention:** store only the *path* in the DB
-(`logo/cupcake-delight.png`), never a full URL — public URLs embed the
-project ref and would break if the bucket policy changes. The API resolves
-paths to signed/public URLs at read time.
+`logo` (2 MB), `hero` (5 MB), `menu-items` (5 MB) — public read, png/jpg/webp
+(`svg` also allowed for `logo`). Store only bucket-relative paths in
+`image_path` / settings, never full URLs. `npm run setup` creates these buckets.
 
 ---
 
 ## 4. Seed data
 
-Run `sql/002_seed.sql`.
+`sql/002_seed.sql` inserts settings and 30 `dining_tables` with random
+`qr_token`s. Notable settings:
 
-**4a. Settings (email still pending)**
+| key | value | meaning |
+|---|---|---|
+| `ordering_enabled` | `true` | admin/cashier can toggle; customers see view-only menu when off |
+| `telegram_language` | `bilingual` | `en`, `am` or `bilingual` |
+| `default_language` | `en` | initial EN/አማ choice in UI |
+| `vat_mode` / `vat_rate` | `inclusive` / `15` | **display only**, never added to totals |
+| `currency_code` / `currency_symbol` | `ETB` | receipt + dashboard display |
 
-```sql
-insert into settings (key, value) values
-  ('brand_name',            '"Cupcake Delight"'),
-  ('brand_name_am',         '"ኩፕኬክ ደላይት"'),
-  ('tagline',               '"Freshly baked, every day"'),
-  ('tagline_am',            '"በየቀኑ አዲስ የተጋገረ"'),
-  ('address',               '"Bole Medihanialem, Robel Plaza, Ground Floor"'),
-  ('phone',                 '"+251 978 020 270"'),
-  ('phone_alt',             '"+251 91 112 1119"'),
-  ('email',                 '"[PLACEHOLDER]"'),
-  ('currency_code',         '"ETB"'),
-  ('currency_symbol',       '"ETB"'),
-  ('currency_position',     '"before"'),      -- renders "ETB 1,234.56"
-  ('vat_mode',              '"inclusive"'),   -- 'inclusive' | 'exclusive'
-  ('vat_rate',              '15'),            -- set 0 if not VAT-registered
-  ('default_language',      '"en"'),          -- 'en' | 'am'
-  ('require_waiter_confirmation', 'true'),    -- default ON
-  ('logo_path',             'null'),          -- set after upload
-  ('hero_path',             'null')           -- set after upload
-on conflict (key) do nothing;
-```
+`node scripts/seed-users.js` seeds 3 users from the `*_INITIAL_PASSWORD`
+variables: `admin`, `waiter1`, `cashier1`. **There is no `kitchen1`.** Every
+seeded user has `must_change_password = true`.
 
-**4b. Staff users** — initial passwords are the role name + `123`:
+`sql/004_menu.sql` seeds 15 categories / 114 items (9 food + 6 drink sections)
+and refuses to run once `order_items` exist, so live receipts cannot be
+orphaned.
 
-| username | initial password |
-|---|---|
-| `admin` | `[from ADMIN_INITIAL_PASSWORD]` |
-| `waiter1` | `[from WAITER_INITIAL_PASSWORD]` |
-| `kitchen1` | `[from KITCHEN_INITIAL_PASSWORD]` |
-| `cashier1` | `[from CASHIER_INITIAL_PASSWORD]` |
-
-All are 8+ characters, satisfying the password policy. This trial does not
-force a password change on first login; rotate any credential only if you
-want to.
-
-```sql
-(no users seeded in SQL; run node scripts/seed-users.js)
-```
-
-> `crypt()` needs `pgcrypto`:
-> `create extension if not exists pgcrypto;`
-
-**4c. 30 tables** with random `qr_token`:
-
-```sql
-insert into tables (table_number, name, capacity, qr_token)
-select n,
-       'Table ' || n,
-       4,
-       encode(gen_random_bytes(16), 'hex')     -- 32-char hex token
-from generate_series(1, 30) as n;
-```
-
-**4d. Menu** — the real menu is seeded by `sql/004_menu.sql` (applied by
-`scripts/db-setup.js` right after this file): **15 sections** (9 `food` +
-6 `drink`) and **114 items**, all prices in ETB.
+Provision a **fresh** project with:
 
 ```bash
-node scripts/db-setup.js     # applies 001–004 + runs the verification checks
+npm run setup     # apply 001–004, buckets, users, verification
 ```
 
-The sections are: Breakfast, Pasta, Salads, Pizza, Main Dish, Burger &
-Sandwich, Desserts, Cupcakes, Ice Cream *(food)* · Coffee, Iced Coffee,
-Milk-Infused, Juices & Smoothies, Tea, Soft Drinks *(drink)*.
+---
 
-Two notes:
+## 5. Order numbers and receipts
 
-- The section value is `drink` in the DB, but the legacy client code still
-  uses the internal value `bar` for the same thing. The **UI label is
-  "Drinks"** everywhere; only the internal value differs (renamed when the
-  read paths move to Supabase).
-- `004_menu.sql` wipes and reseeds `menu_categories` + `menu_items`, but it
-  **refuses to run** once any `order_items` row exists, so it can never
-  orphan live orders.
+`order_no` comes from a plain Postgres sequence (1001, never wraps) and is
+**staff-only**. The public receipt URL uses the random `public_token`
+(`/receipt/<token>` / `GET /api/receipt/:token`), never the sequential number.
+Orders are inserted and committed **before** Telegram is contacted; a failed
+notification is audited, never fatal.
 
-To reseed the menu by hand instead:
+`ordering_enabled=false` is enforced in `POST /api/orders` on the server.
+Menu and prices remain editable by admin regardless of the toggle. Totals are
+computed server-side from DB prices in integer cents (`src/utils/money.js`);
+VAT settings are display only.
+
+### Step 4 API
+
+| Method | Path | Access | Notes |
+|---|---|---|---|
+| POST | `/api/orders` | public | `{table_id,items:[{menu_item_id,quantity}]}` → `{order_no,public_token,total,total_cents,items}`. 409 when ordering is off. |
+| GET | `/api/receipt/:token` | public | Token-only; unknown token → 404. |
+| GET | `/api/orders`, `/api/orders/live` | all 3 staff roles | Newest first; `live` omits cancelled orders. |
+| POST | `/api/orders/:id/cancel` | all 3 staff roles | `{reason}` mandatory; audit `order.cancel`. |
+| GET/PUT | `/api/settings` | public / admin | DB-backed JSONB settings; audit `settings.update`. |
+| PUT | `/api/settings/ordering` | admin, cashier | `{enabled}`; audit `ordering.toggle`. |
+| GET/POST | `/api/tables`, `/api/tables/:id/qr` | public reads | Admin can create/deactivate tables; `GET /api/tables/qr-sheet.pdf` prints all active tables. |
+| GET/POST/PUT/DELETE | `/api/menu`, `/api/categories` | public read, admin write | Includes `available`, `sort_order`, bilingual fields and Storage image paths. |
+
+There is no status endpoint, amendment route, customer edit, or order deletion.
+
+---
+
+## 6. Tests — isolated by default, explicit live override
+
+By default smoke tests target a disposable project only. Copy
+`.env.test.example` to `.env.test` and fill it with a separate Supabase project
+plus dedicated smoke users:
 
 ```bash
-psql "$SUPABASE_DB_URL" -f sql/004_menu.sql
+TEST_DATABASE_URL=postgresql://...          # disposable project
+TEST_SUPABASE_URL=https://<test-ref>.supabase.co
+TEST_SUPABASE_SERVICE_ROLE_KEY=...
+TEST_SUPABASE_ANON_KEY=...
+SMOKE_ADMIN_PASSWORD=<random>
+SMOKE_WAITER_PASSWORD=<random>
+SMOKE_CASHIER_PASSWORD=<random>
 ```
+
+`npm run smoke` targets that project and refuses to start if
+`TEST_DATABASE_URL` equals the live `DATABASE_URL`, if the test project equals
+the live project, or if the test DB URL contains the live project ref. It seeds
+`smoke_admin` / `smoke_waiter` / `smoke_cashier` (with
+`must_change_password = false`) via `npm run seed:smoke-users`, creates tagged
+rows and removes them with `npm run smoke:cleanup`. `audit_log` is append-only
+and is left intact — reset the test project when a clean trail is needed.
+
+`npm run smoke:offline` uses an in-process REST stub for network-free checks.
+
+**Live override (explicitly authorised for this project):** set
+`ALLOW_LIVE_SMOKE=1` to point `seed:smoke-users`, `smoke` and `smoke:cleanup` at
+`.env`. The same restrictions apply: only `smoke_*` accounts are used, cleanup
+**deactivates** them (never the real admin) and removes tagged data, and the
+append-only audit rows stay until the one-time purge in § 9. Do not smoke after
+that purge.
+
+`npm run reset` is **test-only**: it requires both an isolated `.env.test` and
+`ALLOW_TEST_RESET=1` (`npm run reset:test`). It can never drop live tables, and
+`ALLOW_LIVE_SMOKE` does not change that guard.
 
 ---
 
-## 5. Order number generation (plain sequence from 1001)
+## 7. Verification
+
+After `npm run setup`, the script checks: 8 tables, 3 roles / 3 seed users,
+no payments/status/VAT columns, `public_token` unique, cancel-reason check,
+`must_change_password` and display-only VAT settings, 30 tables, 15/114 menu
+rows, settings, RLS on 8 tables and append-only audit triggers.
+
+Useful queries:
 
 ```sql
-create sequence order_number_seq start 1001 minvalue 1001;
-```
-
-Nothing else is required — call it with `nextval('order_number_seq')` when
-creating an order. The sequence only ever increases, never wraps, so
-`orders.order_no` is **UNIQUE** and an old number can never be reused. The
-public tracker can therefore look the order up directly:
-
-```sql
-select order_no, status from orders where order_no = $1;
-```
-
----
-
-## 6. Order total calculation (SQL, no float math)
-
-Totals are computed in the database so JS never touches money:
-
-```sql
-create or replace function calc_order_total(
-  p_subtotal numeric, p_vat_mode text, p_vat_rate numeric
-) returns table (vat_amount numeric, total numeric)
-language sql as $$
-  select
-    case when p_vat_mode = 'exclusive'
-         then round(p_subtotal * p_vat_rate / 100, 2)
-         else round(p_subtotal - (p_subtotal / (1 + p_vat_rate / 100)), 2)
-    end as vat,
-    case when p_vat_mode = 'exclusive'
-         then p_subtotal + round(p_subtotal * p_vat_rate / 100, 2)
-         else p_subtotal
-    end as total;
-$$;
-```
-
-- **exclusive** → cart shows a "VAT excluded" note, VAT added at checkout
-- **inclusive** → no note, VAT already inside the price
-- The chosen `vat_mode` and `vat_rate` are **copied onto the order row** so a
-  later settings change never rewrites history.
-
----
-
-## 7. Verifying the setup
-
-```sql
--- expect 30
-select count(*) from tables;
--- expect 1001 (first call consumes it; the next order gets 1002)
-select nextval('order_number_seq');
--- order_no must be unique
-select conname from pg_constraint where conrelid='orders'::regclass and contype='u';
--- expect 'ETB', 15, 'inclusive'
-select value from settings where key in ('currency_code','vat_rate','vat_mode');
--- expect 4 roles, no bartender
-select distinct role from users;
--- confirm amendments are gone
-select to_regclass('public.order_amendments');   -- expect null
--- confirm no public_token anywhere
+select distinct role from users;                       -- admin, cashier, waiter
+select to_regclass('public.payments');                 -- null
 select column_name from information_schema.columns
- where column_name in ('public_token','must_change_password');  -- expect 0 rows
+ where table_name='orders' and column_name in ('status','public_token','cancel_reason');
+select key, value from settings
+ where key in ('ordering_enabled','telegram_language','vat_mode','vat_rate');
+select count(*) from information_schema.columns
+ where table_name='users' and column_name='must_change_password';  -- 1
 ```
-
-Then, in the app: log in as admin → **Tables & QR** should show 30 cards
-(each QR pointing at `menu.html?t=<token>` once the token step lands).
 
 ---
 
 ## 8. Assumptions recorded
 
-1. **Order numbers start at 1001 and increase forever — no wrap-around.**
-   `orders.order_no` is therefore `UNIQUE`, an old number is never reused, and
-   the public tracker resolves a number to exactly one order. No random
-   suffix.
-2. **No `must_change_password`** — password changes are never forced. Admin
-   can change any user's password; every user can change their own. Min 8
-   characters. `password_changed_at` is retained for audit only.
-3. **`token_version`** starts at 0 and is incremented on password change,
-   password reset, deactivation and logout. Tokens carry `user_id` +
-   `token_version`, are HMAC-signed, and have **no fixed expiry**.
-4. **No `order_amendments`** table, endpoints or UI. Cancellation replaces it:
-   waiter or admin before `preparing`, admin only at/after `preparing`,
-   `cancel_reason` mandatory, always audit-logged.
-5. **No `public_token`** on orders. Tracking is by sequential `order_no` and
-   returns **only** `{order_no, status}` — never items, notes, table or
-   prices — and is rate-limited.
-6. **`require_waiter_confirmation` defaults to `true`**: a customer order sits
-   at `pending` until a waiter confirms it; kitchen can then start.
-7. **Currency** is `ETB`, displayed as `ETB 1,234.56`. `vat_rate` defaults to
-   `15`, set to `0` if the client turns out not to be VAT-registered.
-8. **Tables**: 30 plain tables (`Table 1`–`Table 30`), capacity 4. Admin can
-   add tables, deactivate/reactivate, and regenerate `qr_token`. **No hard
-   delete** — the endpoint is not exposed at all. Inactive tables are hidden
-   from the customer selector and waiter list; their QR shows a friendly
-   "table not available" page.
-9. **Walk-ins**: a waiter may place an order for any active table from a list,
-   with no QR scan.
-10. **Roles** are exactly `admin`, `waiter`, `kitchen`, `cashier`. The
-    `bartender` role and the food/bar order split are gone; drinks are an
-    ordinary menu category handled by the same kitchen.
-11. **One order per cart** — no more splitting into a food order and a bar
-    order.
-12. **Images** are uploaded to Supabase Storage and stored as `image_path`
-    (bucket-relative), never as a full URL. Limits: logo 2 MB, hero/menu 5
-    MB, png/jpg/svg/webp only.
-13. **Menu is real; email is the only placeholder left** — the 15-section /
-    114-item menu is seeded from `sql/004_menu.sql`. Address and phones are
-    seeded with the real details; logo and hero are served from
-    `public/pics/`. Email is still marked `[PLACEHOLDER]` until supplied.
-14. **Service charge** — menu prices are inclusive of 15% VAT **and 10%
-    service charge**, but only VAT is modelled in the schema today. The
-    10% service charge is added in the money step (Step 8 of
-    `MIGRATION_PLAN.md`).
-15. **RLS is enabled**; the server uses the service-role key. Anon-key
-    policies exist only for public menu/category reads if client-side access
-    is added later.
-16. **Language**: English and Amharic. `default_language` is `en`; menu items
-    carry `name_am` / `description_am`; the user toggle persists per device.
-    Amharic is LTR, so no RTL handling is required.
-17. **Telegram stays optional** — no-op when `TELEGRAM_BOT_TOKEN` /
-    `TELEGRAM_CHAT_ID` are unset — and messages become localized and use the
-    configured currency (the legacy hardcoded `ETB` goes away with them).
-18. **`order_number_seq` is a plain Postgres `SEQUENCE` starting at 1001** —
-    no wrap-around, so `order_no` is unique forever. Postgres sequences are
-    allocation-based (nextval is atomic), so concurrent orders cannot receive
-    the same number.
-19. **Audit scope**: every staff mutation (orders, status changes,
-    cancellations, menu, categories, tables, users, passwords, settings,
-    uploads) writes to `audit_log` with before/after JSON. Customer reads are
-    not audited.
+1. Orders start at `order_no` 1001 and are never deleted; cancellation only
+   sets `cancel_reason`, `cancelled_by`, `cancelled_at` and is audited.
+2. Customers can view the menu and receive a receipt, but cannot edit, cancel
+   or look up an order by number. The receipt key is random and unguessable.
+3. Tokens: HMAC-signed `uid` + `token_version`, no expiry; revocation by
+   bumping the version or logging out. Also delivered as an HttpOnly cookie.
+   Role is always reloaded from the DB.
+4. Login is rate-limited (5 failures / 15 min per username/IP); auth events
+   including failures are audited. `JWT_SECRET` is mandatory in production.
+5. Ordering toggle: admin + cashier, audited. Menu/prices: admin only. Order
+   view + cancel: admin + cashier + waiter.
+6. Prices are the total in the configured currency. VAT is shown from
+   `vat_mode`/`vat_rate` for display only and is never added to a total; there
+   is no service charge.
+7. One order per cart; drinks are ordinary menu categories. No amendments.
+8. EN/አማ strings are externalized (`src/i18n/strings.js`, added in Step 6);
+   Telegram uses `telegram_language` (`bilingual` default).
+9. Dashboard auto-refreshes and highlights/sounds on new orders. Each staff
+   role sees the same order list; only reason-bearing cancel is an action.
+10. RLS is on everywhere; anon policies are only for future client-side reads.
+11. All existing staff are forced to set a new password after the migration.
 
 ---
 
-## 9. Checklist
+## 9. One-time live audit purge (owner-run, before handover)
 
-- [ ] Project created, `.env` filled in
-- [ ] `001_schema.sql` run — no errors
-- [ ] RLS enabled on all 8 tables (the sequence needs none)
-- [ ] `pgcrypto` extension enabled
-- [ ] Three storage buckets created with policies
-- [ ] `002_seed.sql` run — settings, users, 30 tables
-- [ ] `004_menu.sql` run — 15 categories, 114 items
-- [ ] `order_number_seq` created as a SEQUENCE starting at 1001
-- [ ] `calc_order_total()` created
-- [ ] Verification queries in §7 all return expected values
-- [ ] (Optional) Placeholder admin password rotated
+The migration and smoke never delete live audit rows. Immediately before
+handover, the owner should run the following **manually** in the SQL Editor,
+in a logged session. It records the purge itself, removes only the two trigger
+guards for the duration of the transaction and restores the exact definitions
+from `001_schema.sql`. Do not automate this and do not change the append-only
+triggers in application or migration code.
+
+```sql
+begin;
+
+insert into audit_log (action, entity_type, entity_id, after)
+values (
+  'audit.purge', 'audit_log', 'live',
+  jsonb_build_object(
+    'reason', 'one-time pre-handover cleanup',
+    'rows_before', (select count(*) from audit_log)
+  )
+);
+
+drop trigger audit_log_no_update on audit_log;
+drop trigger audit_log_no_delete on audit_log;
+
+delete from audit_log where action <> 'audit.purge';
+
+create trigger audit_log_no_update before update on audit_log
+  for each row execute function audit_log_append_only();
+create trigger audit_log_no_delete before delete on audit_log
+  for each row execute function audit_log_append_only();
+
+commit;
+
+-- Verify: 2 triggers, 1 surviving purge row.
+select count(*) as triggers from pg_trigger
+ where tgrelid='audit_log'::regclass and not tgisinternal;   -- 2
+select action, created_at from audit_log order by id;        -- audit.purge
+```
+
+The same procedure is saved as `sql/011_purge_audit_live.sql`. If your
+`audit_log` lacks the `after` column, drop that argument and the
+`jsonb_build_object(...)` line; the purge row still records the action.
+
+---
+
+## 10. Checklist
+
+- [ ] `.env` filled in (no `KITCHEN_INITIAL_PASSWORD` needed)
+- [ ] **Live project:** `npm run backup`, `npm run migrate`, then `npm run migrate:step4`
+- [ ] `npm run verify:db` passes (including `create_order` RPC checks)
+- [ ] All staff forced to change password on next login
+- [ ] Three Storage buckets created
+- [ ] 3 staff users seeded (**for fresh projects only**); no `kitchen1`
+- [ ] `ordering_enabled`, `telegram_language`, `vat_mode`, `vat_rate` in settings
+- [ ] Smoke completed (isolated `.env.test` project, or `ALLOW_LIVE_SMOKE=1` on this live project); `smoke_*` users deactivated
+- [ ] `npm run smoke:offline` passes
+- [ ] **Last step before handover:** one-time live `audit_log` purge (§ 9); no smoke afterwards
+- [ ] Rotate initial passwords

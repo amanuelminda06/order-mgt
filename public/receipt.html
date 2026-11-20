@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F9E98A">
+  <title>Receipt - Cupcake Delights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--brand-yellow:#F9E98A;--primary:#914930;--primary-dark:#5B382D;--dark:#5B382D;--dark2:#914930;--text:#5B382D;--text-muted:rgba(91,56,45,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--accent:#E8B75C;--success:#27ae60;--error:#b3402f;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(91,56,45,0.10)}
+    body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding-bottom:40px}
+    .header{background:linear-gradient(135deg,rgba(91,56,45,0.88),rgba(145,73,48,0.78)),url('/pics/cupcake%20hero.jpg') center/cover no-repeat,var(--dark);padding:24px 16px;text-align:center;color:#fff}
+    .header-logo{width:64px;height:64px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:26px;color:var(--primary);overflow:hidden}
+    .header h1{font-family:var(--font-hand);font-size:2rem;color:var(--bg);margin-bottom:2px}
+    .header p{font-size:0.82rem;color:rgba(255,253,245,0.85)}
+    .bilingual-sub{font-size:0.72rem;color:var(--text-muted);display:block;font-weight:400}
+    .header .bilingual-sub{color:rgba(255,253,245,0.85)}
+    .receipt-wrap{max-width:560px;margin:24px auto;padding:0 16px}
+    .receipt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);position:relative}
+    .receipt-card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(90deg,var(--brand-yellow) 0 12px,var(--primary) 12px 24px);border-radius:var(--radius) var(--radius) 0 0}
+    .receipt-head{text-align:center;margin-bottom:20px}
+    .receipt-head h2{font-family:var(--font-serif);font-size:1.4rem;color:var(--dark2)}
+    .order-badge{display:inline-block;background:var(--primary);color:#fff;border-radius:20px;padding:4px 16px;font-weight:700;font-size:0.85rem;margin-top:8px}
+    .meta-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:0.85rem}
+    .meta-row span:first-child{color:var(--text-muted)}
+    .meta-row span:last-child{font-weight:600;text-align:right}
+    .items-head{font-family:var(--font-serif);font-size:1rem;margin:20px 0 8px;color:var(--dark2)}
+    .item-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.9rem}
+    .item-row .item-name{font-weight:600}
+    .item-row .item-note{font-size:0.75rem;color:var(--text-muted);font-weight:400;display:block}
+    .item-row .item-line{font-weight:700;white-space:nowrap;color:var(--primary)}
+    .total-row{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--primary);margin-top:14px;padding-top:14px;font-size:1.2rem;font-weight:700}
+    .total-row .value{color:var(--primary);font-family:var(--font-serif)}
+    .notes-box{margin-top:16px;background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);border-radius:var(--radius-sm);padding:12px;font-size:0.85rem}
+    .cancelled-box{margin-bottom:20px;background:rgba(179,64,47,0.12);border:1px solid var(--error);border-radius:var(--radius-sm);padding:14px;color:var(--error);font-weight:700}
+    .cancelled-box p{font-weight:400;font-size:0.85rem;margin-top:6px;color:var(--text)}
+    .state{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:48px 20px;box-shadow:var(--shadow)}
+    .state i{font-size:2.5rem;color:var(--primary);margin-bottom:14px;display:block}
+    .state h2{font-family:var(--font-serif);margin-bottom:8px}
+    .state p{color:var(--text-muted);font-size:0.9rem;margin-bottom:18px}
+    .back-link{display:inline-block;background:var(--primary);color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:var(--radius-sm);font-size:0.9rem;margin-top:20px}
+    .back-link i{margin-right:6px}
+    .site-footer{text-align:center;color:var(--text-muted);font-size:0.8rem;padding:0 16px}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-logo"><i class="fas fa-receipt"></i></div>
+    <h1>Cupcake Delights</h1>
+    <p>Receipt <span class="bilingual-sub" lang="am">ደረሰኝ</span></p>
+  </div>
+
+  <main class="receipt-wrap">
+    <div id="loading" class="state"><i class="fas fa-spinner fa-spin"></i><h2>Loading receipt...</h2><p>ደረሰኝዎን በማዘጋጀት ላይ</p></div>
+    <div id="error" class="state" style="display:none">
+      <i class="fas fa-receipt"></i>
+      <h2 id="error-title">Receipt not found</h2>
+      <p id="error-message">This receipt link is invalid or has expired. Please ask the restaurant for help.</p>
+      <a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu <span lang="am">ወደ ምናሌ</span></a>
+    </div>
+    <div id="receipt-card" class="receipt-card" style="display:none">
+      <div class="receipt-head">
+        <h2>Order Receipt <span class="bilingual-sub" lang="am">የትዕዛዝ ደረሰኝ</span></h2>
+        <span class="order-badge">#<span id="order-no"></span></span>
+      </div>
+      <div id="cancelled-box" class="cancelled-box" style="display:none">
+        <i class="fas fa-ban"></i> Cancelled / ተሰርዟል
+        <p id="cancel-reason"></p>
+      </div>
+      <div class="meta-row"><span>Table / ጠረጴዛ</span><span id="table-label">-</span></div>
+      <div class="meta-row"><span>Placed / የተዘዘበት</span><span id="created-at">-</span></div>
+      <h3 class="items-head">Items <span class="bilingual-sub" lang="am">ዕቃዎች</span></h3>
+      <div id="items"></div>
+      <div class="total-row"><span>Total / ጠቅላላ</span><span class="value" id="total"></span></div>
+      <div id="notes-box" class="notes-box" style="display:none"><strong>Special notes / ልዩ መመሪያዎች:</strong> <span id="special-notes"></span></div>
+      <div style="text-align:center"><a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu <span lang="am">ወደ ምናሌ</span></a></div>
+    </div>
+    <p class="site-footer" style="margin-top:16px">Thank you for dining with us! <span lang="am">አመሰግናለን!</span></p>
+  </main>
+
+  <script>
+    const token = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+
+    function money(value, currency) {
+      return (currency || 'ETB') + ' ' + Number(value || 0).toFixed(2);
+    }
+
+    function showError(title, message) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('receipt-card').style.display = 'none';
+      document.getElementById('error-title').textContent = title;
+      document.getElementById('error-message').textContent = message;
+      document.getElementById('error').style.display = 'block';
+    }
+
+    async function loadReceipt() {
+      if (!token) {
+        showError('Receipt not found', 'No receipt link was provided. Please use the private link from your order confirmation.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/receipt/' + encodeURIComponent(token));
+        if (res.status === 404) {
+          showError('Receipt not found', 'This receipt link is invalid. Please ask the restaurant for help.');
+          return;
+        }
+        if (!res.ok) throw new Error('Unable to load receipt');
+        const order = await res.json();
+
+        document.getElementById('order-no').textContent = order.order_no;
+        const table = order.table_name
+          ? (order.table_name + (order.table_number != null ? ' (#' + order.table_number + ')' : ''))
+          : (order.table_number != null ? 'Table #' + order.table_number : '-');
+        document.getElementById('table-label').textContent = table || '-';
+        document.getElementById('created-at').textContent = order.created_at ? new Date(order.created_at).toLocaleString() : '-';
+        document.getElementById('total').textContent = money(order.total, order.currency);
+
+        document.getElementById('items').innerHTML = (order.items || []).map(item => `
+          <div class="item-row">
+            <div>
+              <span class="item-name">${item.quantity}x ${item.name}</span>
+              ${item.notes ? `<span class="item-note" lang="am">📝 ${item.notes}</span>` : ''}
+            </div>
+            <span class="item-line">${money(item.line_total, order.currency)}</span>
+          </div>
+        `).join('') || '<p style="color:var(--text-muted)">No items / ዕቃ የለም</p>';
+
+        if (order.cancelled) {
+          document.getElementById('cancelled-box').style.display = 'block';
+          document.getElementById('cancel-reason').textContent = order.cancel_reason
+            ? 'Reason / ምክንያት: ' + order.cancel_reason
+            : 'This order was cancelled / ይህ ትዕዛዝ ተሰርዷል';
+        }
+
+        if (order.special_notes) {
+          document.getElementById('notes-box').style.display = 'block';
+          document.getElementById('special-notes').textContent = order.special_notes;
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('receipt-card').style.display = 'block';
+      } catch (e) {
+        showError('Could not load receipt', 'Please check your connection and try again.');
+      }
+    }
+
+    loadReceipt();
+  </script>
+</body>
+</html>

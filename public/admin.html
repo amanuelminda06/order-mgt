@@ -74,15 +74,20 @@
     .period-pills{display:flex;gap:8px;margin-bottom:16px}
     .period-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:0.8rem;cursor:pointer}
     .period-pill.active{background:var(--dark2);color:#fff;border-color:var(--dark2)}
-    .amend-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--warning);border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)}
-    .amend-card-info{flex:1}
-    .amend-card-info .amend-order{font-weight:700;color:var(--primary)}
-    .amend-card-info .amend-type{font-weight:700;text-transform:uppercase;color:var(--warning);font-size:0.75rem;margin-left:8px}
-    .amend-card-info .amend-msg{font-size:0.85rem;color:var(--text-muted);margin-top:4px}
-    .amend-card-actions{display:flex;gap:6px}
-    .amend-card-actions button{padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer}
-    .amend-approve{background:var(--success);color:#fff}
-    .amend-deny{background:var(--error);color:#fff}
+    .settings-grid{display:grid;gap:16px;max-width:720px}
+    @media(min-width:700px){.settings-grid{grid-template-columns:1fr 1fr}}
+    .settings-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .settings-card.full{grid-column:1/-1}
+    .settings-card h4{font-family:var(--font-serif);font-size:1rem;color:var(--dark2);margin-bottom:6px}
+    .settings-card p.hint{font-size:0.78rem;color:var(--text-muted);margin-bottom:12px}
+    .settings-card label{display:block;font-size:0.8rem;font-weight:600;margin:10px 0 4px}
+    .settings-card input[type=text],.settings-card input[type=number],.settings-card select{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);background:var(--bg);color:var(--text)}
+    .settings-card .switch-row{display:flex;align-items:center;gap:10px;font-weight:700}
+    .settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .display-only{display:inline-block;background:rgba(201,138,30,0.16);color:var(--warning);border-radius:6px;padding:2px 8px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px}
+    .upload-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+    .upload-row img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--bg)}
+    .notice-line{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px}
     .staff-view{display:none}.staff-view.active{display:block}
     .cat-section-label{font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
     .cat-list{list-style:none;margin-bottom:12px}
@@ -99,9 +104,7 @@
     .filter-btn.active{background:var(--accent);color:var(--text);border-color:var(--primary);font-weight:700}
     .orders-grid{display:grid;gap:12px}
     .order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
-    .order-card.status-pending{border-left-color:var(--warning)}
-    .order-card.status-preparing{border-left-color:var(--bar)}
-    .order-card.status-ready{border-left-color:var(--success)}
+    .order-card.cancelled{border-left-color:var(--error);opacity:0.85}
     .order-card .order-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:10px}
     .order-card .order-number{font-weight:700;font-size:0.95rem}
     .order-card .order-table{background:var(--bg);padding:3px 10px;border-radius:10px;font-size:0.75rem;font-weight:600;color:var(--text-muted)}
@@ -127,6 +130,15 @@
         <button type="submit" class="btn btn-primary">Sign In</button>
         <div id="login-error" class="error-msg"></div>
       </form>
+      <form id="password-form" style="display:none">
+        <h2 style="font-size:1.1rem;margin:0 0 8px">Set a new password</h2>
+        <p style="font-size:0.85rem;opacity:0.8;margin:0 0 12px">For security, you must choose a new password before continuing.</p>
+        <label>Current password</label><input type="password" id="current-password" required>
+        <label>New password (min 8 characters)</label><input type="password" id="new-password" minlength="8" required>
+        <label>Confirm new password</label><input type="password" id="confirm-password" minlength="8" required>
+        <button type="submit" class="btn btn-primary">Set password</button>
+        <div id="password-error" class="error-msg"></div>
+      </form>
     </div>
   </div>
 
@@ -146,24 +158,20 @@
       <div class="admin-tab" onclick="switchTab('menu',this)"><i class="fas fa-utensils"></i>Menu</div>
       <div class="admin-tab" onclick="switchTab('categories',this)"><i class="fas fa-layer-group"></i>Categories</div>
       <div class="admin-tab" onclick="switchTab('tables',this)"><i class="fas fa-chair"></i>Tables & QR</div>
+      <div class="admin-tab" onclick="switchTab('settings',this)"><i class="fas fa-gear"></i>Settings</div>
       <div class="admin-tab" onclick="switchTab('staff',this)"><i class="fas fa-users"></i>Staff</div>
       <div class="admin-tab" onclick="switchTab('analytics',this)"><i class="fas fa-chart-bar"></i>Analytics</div>
+      <div class="admin-tab" onclick="switchTab('audit',this)"><i class="fas fa-history"></i>Audit</div>
     </div>
 
     <div id="tab-orders" class="admin-content active">
-      <div id="pending-amendments-section" style="display:none;margin-bottom:20px">
-        <h3 style="color:var(--warning)"><i class="fas fa-exclamation-triangle"></i> Pending Amendment Requests</h3>
-        <div id="amendments-list"></div>
-      </div>
+      <p class="notice-line">Newest orders first. Cancelling keeps a permanent reason on the order and receipt.</p>
       <div class="filter-pills" id="order-filters">
         <div class="fpill active" onclick="filterOrders('all',this)">All</div>
-        <div class="fpill" onclick="filterOrders('pending',this)">Pending</div>
-        <div class="fpill" onclick="filterOrders('preparing',this)">Preparing</div>
-        <div class="fpill" onclick="filterOrders('ready',this)">Ready</div>
-        <div class="fpill" onclick="filterOrders('completed',this)">Completed</div>
+        <div class="fpill" onclick="filterOrders('open',this)">Open</div>
         <div class="fpill" onclick="filterOrders('cancelled',this)">Cancelled</div>
       </div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Order</th><th>Table</th><th>Type</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody id="orders-tbody"></tbody></table></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Order</th><th>Table</th><th>Items</th><th>Total</th><th>Notes / Reason</th><th>Time</th><th>Actions</th></tr></thead><tbody id="orders-tbody"></tbody></table></div>
     </div>
 
     <div id="tab-menu" class="admin-content">
@@ -197,8 +205,63 @@
     </div>
 
     <div id="tab-tables" class="admin-content">
-      <h3>Tables & QR Codes</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <h3 style="margin:0">Tables & QR Codes</h3>
+        <a class="btn btn-sm" style="background:var(--accent);color:var(--text);text-decoration:none" href="/api/tables/qr-sheet.pdf" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> Print QR sheet (PDF)</a>
+      </div>
+      <div class="settings-card" style="margin-bottom:18px;max-width:720px">
+        <h4>Add a table</h4>
+        <p class="hint">QR tokens are generated automatically. Tables are never deleted — old receipts stay valid.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+          <div style="flex:1;min-width:120px"><label style="font-size:0.8rem;display:block;margin-bottom:4px">Table number</label><input type="number" id="new-table-number" min="1" step="1" placeholder="e.g. 12" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font-sans)"></div>
+          <div style="flex:1;min-width:120px"><label style="font-size:0.8rem;display:block;margin-bottom:4px">Name (optional)</label><input type="text" id="new-table-name" placeholder="e.g. Window table" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font-sans)"></div>
+          <div style="width:110px"><label style="font-size:0.8rem;display:block;margin-bottom:4px">Capacity</label><input type="number" id="new-table-capacity" min="1" value="4" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--font-sans)"></div>
+          <button class="btn btn-sm btn-success" onclick="createTable()"><i class="fas fa-plus"></i> Add table</button>
+        </div>
+      </div>
       <div class="qr-grid" id="qr-grid"></div>
+    </div>
+
+    <div id="tab-settings" class="admin-content">
+      <h3>Restaurant Settings</h3>
+      <p class="notice-line">Changes are saved immediately and recorded in the audit log. VAT settings are display-only and are never added to order totals.</p>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h4><i class="fas fa-power-off"></i> Ordering</h4>
+          <p class="hint">When paused, customers can browse the menu but cannot place orders.</p>
+          <label class="switch-row"><input type="checkbox" id="setting-ordering" checked onchange="toggleOrdering(this)"> Accepting orders</label>
+          <div id="ordering-status" class="hint" style="margin-top:8px"></div>
+        </div>
+        <div class="settings-card">
+          <h4><i class="fas fa-store"></i> Brand & currency</h4>
+          <label>Brand name</label><input type="text" id="setting-brand">
+          <label>Tagline</label><input type="text" id="setting-tagline">
+          <label>Currency code</label><input type="text" id="setting-currency-code" placeholder="ETB">
+          <label>Currency symbol</label><input type="text" id="setting-currency-symbol" placeholder="ETB">
+          <div class="settings-actions"><button class="btn btn-sm btn-success" onclick="saveSettings()">Save details</button></div>
+        </div>
+        <div class="settings-card">
+          <h4><i class="fas fa-percent"></i> VAT display <span class="display-only">DISPLAY ONLY</span></h4>
+          <p class="hint">Shown to customers for information only — not added to totals.</p>
+          <label>VAT mode</label>
+          <select id="setting-vat-mode"><option value="inclusive">Inclusive</option><option value="exclusive">Exclusive</option></select>
+          <label>VAT rate (%)</label><input type="number" id="setting-vat-rate" min="0" max="100" step="0.01" placeholder="15">
+          <div class="settings-actions"><button class="btn btn-sm btn-success" onclick="saveVatSettings()">Save VAT display</button></div>
+        </div>
+        <div class="settings-card">
+          <h4><i class="fas fa-language"></i> Notifications</h4>
+          <label>Telegram language</label>
+          <select id="setting-tg-language"><option value="bilingual">Bilingual (EN + አማ)</option><option value="am">Amharic</option><option value="en">English</option></select>
+          <div class="settings-actions"><button class="btn btn-sm btn-success" onclick="saveTelegramLanguage()">Save language</button></div>
+        </div>
+        <div class="settings-card full">
+          <h4><i class="fas fa-image"></i> Branding images</h4>
+          <p class="hint">Uploads use the logo / hero buckets. The saved path is stored as a bucket-relative path in settings.</p>
+          <div class="upload-row"><img id="logo-preview" src="" alt="Logo preview" style="display:none"><div><label>Logo</label><input type="file" id="logo-file" accept="image/*" onchange="uploadBranding(this,'logo')"></div></div>
+          <div class="upload-row"><img id="hero-preview" src="" alt="Hero preview" style="display:none;border-radius:var(--radius-sm)"><div><label>Hero image</label><input type="file" id="hero-file" accept="image/*" onchange="uploadBranding(this,'hero')"></div></div>
+        </div>
+      </div>
+      <div id="settings-status" class="notice-line" style="margin-top:12px"></div>
     </div>
 
     <div id="tab-staff" class="admin-content">
@@ -222,6 +285,12 @@
         <div class="chart-card"><h4>Hourly Orders</h4><div id="hourly-chart" style="display:flex;align-items:end;height:100px;gap:2px"></div></div>
       </div>
     </div>
+
+    <div id="tab-audit" class="admin-content">
+      <h3>Audit log</h3>
+      <p class="notice-line">Append-only record of staff actions and settings changes (newest first).</p>
+      <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Action</th><th>Actor</th><th>Entity</th><th>Details</th></tr></thead><tbody id="audit-tbody"></tbody></table></div>
+    </div>
   </div>
 
   <div id="staff-view" class="staff-view">
@@ -233,11 +302,9 @@
         <button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
       </div>
     </div>
-    <div class="filter-bar" style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card)">
-      <button class="filter-btn active" onclick="staffSetFilter('all',this)">All</button>
-      <button class="filter-btn" onclick="staffSetFilter('pending',this)">Pending</button>
-      <button class="filter-btn" onclick="staffSetFilter('preparing',this)">Preparing</button>
-      <button class="filter-btn" onclick="staffSetFilter('ready',this)">Ready</button>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span style="font-size:0.8rem;color:var(--text-muted)">Uncancelled orders, newest first · auto-refreshing</span>
+      <button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border)" onclick="loadStaffOrders()"><i class="fas fa-rotate"></i> Refresh</button>
     </div>
     <div style="padding:16px">
       <div class="orders-grid" id="staff-orders-grid"></div>
@@ -257,88 +324,130 @@
   </div>
 
   <script>
-    let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffFilter='all', staffRefreshInterval, allCategories=[];
+    let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffRefreshInterval, allCategories=[], pendingLogin=null;
+
+    function showLogin(err){
+      token=''; userRole=''; pendingLogin=null;
+      clearInterval(staffRefreshInterval);
+      document.getElementById('login-form').style.display='';
+      document.getElementById('password-form').style.display='none';
+      document.getElementById('login-error').textContent=err||'';
+      document.getElementById('login-error').style.display=err?'block':'none';
+      document.getElementById('password-error').style.display='none';
+      document.getElementById('login-page').style.display='flex';
+      document.getElementById('admin').classList.remove('active');
+      document.getElementById('staff-view').classList.remove('active');
+    }
+
+    function enterApp(data){
+      token=data.token; userRole=data.role;
+      document.getElementById('login-page').style.display='none';
+      document.getElementById('admin-user').textContent=data.full_name;
+      document.getElementById('staff-user-info').textContent=data.full_name;
+      document.getElementById('staff-role-badge').textContent=data.role;
+      document.getElementById('staff-role-badge').className='role-badge role-'+data.role;
+      if (data.role==='admin') {
+        document.getElementById('admin').classList.add('active');
+        document.getElementById('admin-header-title').textContent='Cupcake Delights Admin';
+        loadAll();
+      } else {
+        document.getElementById('staff-view').classList.add('active');
+        document.getElementById('staff-header-title').textContent='Live Orders · ትዕዛዞች';
+        loadStaffOrders();
+        staffRefreshInterval=setInterval(loadStaffOrders,8000);
+      }
+    }
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errEl=document.getElementById('login-error'); errEl.style.display='none';
-      const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('username').value,password:document.getElementById('password').value})});
+      const username=document.getElementById('username').value;
+      const password=document.getElementById('password').value;
+      const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
       const data=await res.json();
-      if (res.ok) {
-        token=data.token; userRole=data.role;
-        document.getElementById('login-page').style.display='none';
-        document.getElementById('admin-user').textContent=data.full_name;
-        document.getElementById('staff-user-info').textContent=data.full_name;
-        document.getElementById('staff-role-badge').textContent=data.role;
-        document.getElementById('staff-role-badge').className='role-badge role-'+data.role;
-        if (data.role==='admin') {
-          document.getElementById('admin').classList.add('active');
-          document.getElementById('admin-header-title').textContent='Cupcake Delights Admin';
-          loadAll();
-        } else {
-          document.getElementById('staff-view').classList.add('active');
-          document.getElementById('staff-header-title').textContent='Live Orders';
-          loadStaffOrders();
-          staffRefreshInterval=setInterval(loadStaffOrders,8000);
-        }
-      } else { errEl.textContent=data.error||'Login failed'; errEl.style.display='block'; }
+      if (!res.ok) { errEl.textContent=data.error||'Login failed'; errEl.style.display='block'; return; }
+      if (data.must_change_password) {
+        pendingLogin={...data, password};
+        token=data.token;
+        document.getElementById('current-password').value=password;
+        document.getElementById('new-password').value='';
+        document.getElementById('confirm-password').value='';
+        document.getElementById('login-form').style.display='none';
+        document.getElementById('password-form').style.display='';
+        return;
+      }
+      enterApp(data);
     });
 
-    function logout(){token='';userRole='';clearInterval(staffRefreshInterval);document.getElementById('login-page').style.display='flex';document.getElementById('admin').classList.remove('active');document.getElementById('staff-view').classList.remove('active');}
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl=document.getElementById('password-error'); errEl.style.display='none';
+      const next=document.getElementById('new-password').value;
+      if (next!==document.getElementById('confirm-password').value) {
+        errEl.textContent='New passwords do not match'; errEl.style.display='block'; return;
+      }
+      if (next.length<8) { errEl.textContent='Use at least 8 characters'; errEl.style.display='block'; return; }
+      const res=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({current_password:document.getElementById('current-password').value,new_password:next})});
+      const data=await res.json();
+      if (!res.ok) { errEl.textContent=data.error||'Could not change password'; errEl.style.display='block'; return; }
+      const session=pendingLogin; pendingLogin=null;
+      enterApp({...session, token:data.token, must_change_password:false});
+    });
+
+    function logout(){fetch('/api/logout',{method:'POST',headers:{'Authorization':token}}).catch(()=>{});showLogin();}
     function switchTab(t,el){document.querySelectorAll('.admin-tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.admin-content').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+t).classList.add('active');}
     function closeModal(){document.getElementById('modal-overlay').classList.remove('active');}
-    function loadAll(){loadAmendments();loadOrders();loadMenuTable();loadCategories();loadTablesQR();loadStaffTable();loadAnalytics('today');}
+    function loadAll(){loadOrders();loadMenuTable();loadCategories();loadTablesQR();loadStaffTable();loadSettings();loadAnalytics('today');loadAudit();}
 
-    // ORDERS
+    // ORDERS — no status workflow; cancellation is the only state change.
     function filterOrders(f,el){currentOrderFilter=f;document.querySelectorAll('#order-filters .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');loadOrders();}
 
-    // AMENDMENTS
-    async function loadAmendments(){
-      const res=await fetch('/api/amendments?status=pending',{headers:{'Authorization':token}});
-      if (res.status===401){return;}
-      const amendments=await res.json();
-      const section=document.getElementById('pending-amendments-section');
-      const list=document.getElementById('amendments-list');
-      if(amendments.length===0){section.style.display='none';return;}
-      section.style.display='block';
-      list.innerHTML=amendments.map(a=>`
-        <div class="amend-card">
-          <div class="amend-card-info">
-            <span class="amend-order">${a.order_number}</span>
-            <span class="amend-type">${a.type}</span>
-            <div class="amend-msg">"${a.message}"</div>
-          </div>
-          <div class="amend-card-actions">
-            <button class="amend-approve" onclick="resolveAmendment(${a.id},'approved')"><i class="fas fa-check"></i> Approve</button>
-            <button class="amend-deny" onclick="resolveAmendment(${a.id},'denied')"><i class="fas fa-times"></i> Deny</button>
-          </div>
-        </div>
-      `).join('');
+    function currencyOf(order){return (order && order.currency) || 'ETB';}
+
+    function itemsHtml(order){
+      return (order.items||[]).map(i=>`<div>${i.quantity}x ${i.name} — ${currencyOf(order)} ${Number(i.line_total).toFixed(2)}${i.notes?` <em>(${i.notes})</em>`:''}</div>`).join('');
     }
-    async function resolveAmendment(id,status){
-      await fetch(`/api/amendments/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});
-      loadAmendments();loadOrders();
-    }
+
     async function loadOrders(){
       const res=await fetch('/api/orders',{headers:{'Authorization':token}});
       if (res.status===401){logout();return;}
-      let orders=await res.json();
-      if (currentOrderFilter!=='all')orders=orders.filter(o=>o.status===currentOrderFilter);
-      document.getElementById('orders-tbody').innerHTML=orders.map(o=>{
-        const items=o.items.map(i=>`${i.quantity}x ${i.name}`).join(', ');
+      const orders=await res.json();
+      const shown=currentOrderFilter==='all'?orders:orders.filter(o=>currentOrderFilter==='cancelled'?o.cancelled:!o.cancelled);
+      document.getElementById('orders-tbody').innerHTML=shown.map(o=>{
         const time=new Date(o.created_at).toLocaleString();
-        const sc={pending:'var(--warning)',preparing:'var(--bar)',ready:'var(--success)',completed:'var(--text-muted)',cancelled:'var(--error)'};
-        return `<tr><td><strong>${o.order_number}</strong></td><td>${o.table_name}</td><td>${o.type==='bar'?'🥤 Drinks':'🍽 Food'}</td><td style="max-width:200px;font-size:0.8rem">${items}</td><td><strong>ETB ${o.total.toFixed(2)}</strong></td><td><span style="color:${sc[o.status]||'inherit'};font-weight:600;text-transform:capitalize">${o.status}</span></td><td style="font-size:0.75rem">${time}</td><td><select style="padding:4px;border-radius:4px;font-size:0.75rem;border:1px solid var(--border)" onchange="changeStatus(${o.id},this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Pending</option><option value="preparing" ${o.status==='preparing'?'selected':''}>Preparing</option><option value="ready" ${o.status==='ready'?'selected':''}>Ready</option><option value="completed" ${o.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option></select></td></tr>`;
-      }).join('');
+        const table=o.table_name||(o.table_number!=null?'Table #'+o.table_number:'-');
+        const notes=o.special_notes||'';
+        const reason=o.cancelled?`<strong style="color:var(--error)">Cancelled${o.cancel_reason?': '+o.cancel_reason:''}</strong>`:'';
+        const noteCell=[notes?`<div>${notes}</div>`:'',reason].filter(Boolean).join('')||'-';
+        return `<tr>
+          <td><strong>#${o.order_no}</strong><br><span style="font-size:0.7rem;color:var(--text-muted)">${o.public_token||''}</span></td>
+          <td>${table}</td>
+          <td style="max-width:240px;font-size:0.8rem">${itemsHtml(o)}</td>
+          <td><strong>${currencyOf(o)} ${Number(o.total).toFixed(2)}</strong></td>
+          <td style="font-size:0.8rem">${noteCell}</td>
+          <td style="font-size:0.75rem">${time}</td>
+          <td>${o.cancelled?'<span style="color:var(--text-muted);font-size:0.8rem">Cancelled</span>':`<button class="btn btn-danger btn-sm" onclick="cancelOrderWithReason(${o.id},${o.order_no})" style="padding:4px 10px;font-size:0.75rem;border-radius:4px"><i class="fas fa-ban"></i> Cancel</button>`}</td>
+        </tr>`;
+      }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">No orders yet</td></tr>';
     }
-    async function changeStatus(id,s){await fetch(`/api/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status:s})});loadOrders();}
+
+    async function cancelOrderWithReason(id,orderNo){
+      let reason=prompt(`Cancel order #${orderNo}? A reason is required and will be visible on the receipt.`);
+      if(reason===null)return;
+      reason=reason.trim();
+      if(!reason){alert('A cancellation reason is required. The order was not cancelled.');return;}
+      const res=await fetch(`/api/orders/${id}/cancel`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({reason})});
+      const data=await res.json();
+      if(!res.ok){alert(data.error||'Could not cancel order');return;}
+      loadOrders();
+    }
 
     // MENU
     function filterMenu(f,el){currentMenuFilter=f;document.querySelectorAll('#menu-filters .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');loadMenuTable();}
     async function loadMenuTable(){
       let url='/api/menu'+(currentMenuFilter!=='all'?`?category=${currentMenuFilter}`:'');
       const res=await fetch(url);const items=await res.json();
-      document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong></td><td>${i.category==='bar'?'🥤 Drinks':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${i.price.toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
+      document.getElementById('menu-tbody').innerHTML=items.map(i=>`<tr><td><strong>${i.name}</strong>${i.name_am?` <span lang="am" style="color:var(--text-muted);font-weight:400">${i.name_am}</span>`:''}</td><td>${i.category==='bar'?'🥤 Drinks':'🍽 Food'}</td><td>${i.subcategory||'-'}</td><td>ETB ${Number(i.price).toFixed(2)}</td><td><button class="avail-toggle ${i.available?'on':'off'}" onclick="toggleAvail(${i.id},${!i.available})"></button></td><td><button class="btn btn-sm" style="background:var(--dark2);color:#fff;border:1px solid var(--primary);padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="editItem(${i.id})">Edit</button> <button class="btn btn-danger btn-sm" style="padding:4px 10px;font-size:0.75rem;border-radius:4px" onclick="deleteItem(${i.id})">Delete</button></td></tr>`).join('');
     }
     async function toggleAvail(id,av){await fetch(`/api/menu/${id}/availability`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({available:av})});loadMenuTable();}
     async function deleteItem(id){if(!confirm('Delete?'))return;await fetch(`/api/menu/${id}`,{method:'DELETE',headers:{'Authorization':token}});loadMenuTable();}
@@ -350,7 +459,7 @@
 
     function openMenuModal(item=null){
       editId=item?item.id:null;
-      editingImage=item?.image||'';
+      editingImage=item?.image_path||item?.image||'';
       document.getElementById('modal-title').textContent=item?'Edit Item':'Add Item';
       const subOpts = allCategories.map(c => `<option value="${c.name}" ${item?.subcategory===c.name?'selected':''}>${c.name}</option>`).join('');
       document.getElementById('modal-body').innerHTML=`<label>Name</label><input type="text" id="m-name" value="${item?.name||''}" required><label>Description</label><textarea id="m-desc" rows="2">${item?.description||''}</textarea><label>Price (ETB)</label><input type="number" id="m-price" step="0.01" value="${item?.price||''}" required><label>Category</label><select id="m-cat"><option value="food" ${item?.category==='food'?'selected':''}>Food</option><option value="bar" ${item?.category==='bar'?'selected':''}>Drinks</option></select><label>Subcategory</label><select id="m-sub">${subOpts}</select><label>Photo</label><img id="m-img-preview" class="img-preview" alt="" src="${editingImage}" style="${editingImage?'':'display:none'}"><input type="file" id="m-img-file" accept="image/*" onchange="previewMenuItemImage(this)"><p class="img-hint" id="m-img-status">JPG, PNG, WebP or GIF · up to 5 MB${editingImage?'':' · no photo yet'}</p>`;
@@ -371,10 +480,11 @@
     }
     async function uploadMenuItemImage(file){
       const dataUrl=await readFileAsDataUrl(file);
-      const res=await fetch('/api/menu/images',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name:file.name,dataUrl})});
+      const res=await fetch('/api/menu/images',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name:file.name,dataUrl,bucket:'menu-items'})});
       const out=await res.json();
       if(!res.ok)throw new Error(out.error||'Upload failed');
-      return out.url;
+      // Store the bucket-relative path; the server knows the public bucket URL.
+      return out.path||out.url;
     }
     async function saveMenu(){
       const status=document.getElementById('m-img-status');
@@ -440,14 +550,122 @@ async function loadCategories(){
       loadCategories();
     }
 
-    // TABLES
+    // TABLES — create and deactivate only; QR tokens are server-generated.
     async function loadTablesQR(){
       const res=await fetch('/api/tables');const tables=await res.json();
       const grid=document.getElementById('qr-grid');grid.innerHTML='';
+      if(!tables.length){grid.innerHTML='<p style="color:var(--text-muted)">No active tables</p>';return;}
       for(const t of tables){
-        const qrRes=await fetch(`/api/tables/${t.id}/qr`);const{qr,url}=await qrRes.json();
-        grid.innerHTML+=`<div class="qr-card"><h4>${t.name}</h4><p>Capacity: ${t.capacity}</p><img src="${qr}"><p style="font-size:0.7rem;color:var(--primary)">${url}</p><button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);margin-top:8px" onclick="window.open('${url}','_blank')">Open</button></div>`;
+        let qr='',url='';
+        try{const qrRes=await fetch(`/api/tables/${t.id}/qr`);const out=await qrRes.json();qr=out.qr||'';url=out.url||'';}catch(e){}
+        grid.innerHTML+=`<div class="qr-card">
+          <h4>${t.name||('Table '+t.table_number)}</h4>
+          <p>Table #${t.table_number} · Capacity: ${t.capacity}</p>
+          ${qr?`<img src="${qr}" alt="QR for table ${t.table_number}">`:'<p style="color:var(--error)">QR unavailable</p>'}
+          <p style="font-size:0.7rem;color:var(--primary)">${url}</p>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+            ${url?`<button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border)" onclick="window.open('${url}','_blank')"><i class="fas fa-qrcode"></i> QR</button>`:''}
+            <button class="btn btn-danger btn-sm" onclick="deactivateTable(${t.id},'${String(t.name||('Table '+t.table_number)).replace(/'/g,"\\'")}')"><i class="fas fa-ban"></i> Deactivate</button>
+          </div>
+        </div>`;
       }
+    }
+    async function createTable(){
+      const numberInput=document.getElementById('new-table-number');
+      const table_number=Number(numberInput.value);
+      if(!Number.isInteger(table_number)||table_number<=0){alert('Enter a valid table number');return;}
+      const name=document.getElementById('new-table-name').value.trim();
+      const capacity=Number(document.getElementById('new-table-capacity').value)||4;
+      const res=await fetch('/api/tables',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({table_number,name:name||undefined,capacity})});
+      const data=await res.json();
+      if(!res.ok){alert(data.error||'Could not create table');return;}
+      numberInput.value='';document.getElementById('new-table-name').value='';
+      loadTablesQR();
+    }
+    async function deactivateTable(id,name){
+      if(!confirm(`Deactivate ${name}? Its QR code will stop accepting orders, but past orders and receipts stay intact.`))return;
+      const res=await fetch(`/api/tables/${id}/deactivate`,{method:'POST',headers:{'Authorization':token}});
+      const data=await res.json();
+      if(!res.ok){alert(data.error||'Could not deactivate table');return;}
+      loadTablesQR();
+    }
+
+    // SETTINGS
+    function setSettingStatus(msg,isError){
+      const el=document.getElementById('settings-status');
+      el.textContent=msg;
+      el.style.color=isError?'var(--error)':'var(--success)';
+    }
+    async function putSetting(key,value){
+      const res=await fetch('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({key,value})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||('Could not save '+key));
+      return data;
+    }
+    async function loadSettings(){
+      try{
+        const res=await fetch('/api/settings');const s=await res.json();
+        document.getElementById('setting-ordering').checked=s.ordering_enabled!==false&&String(s.ordering_enabled)!=='false';
+        document.getElementById('setting-brand').value=s.brand_name||s.restaurant_name||'';
+        document.getElementById('setting-tagline').value=s.tagline||'';
+        document.getElementById('setting-currency-code').value=s.currency_code||'ETB';
+        document.getElementById('setting-currency-symbol').value=s.currency_symbol||s.currency_code||'ETB';
+        document.getElementById('setting-vat-mode').value=s.vat_mode||'inclusive';
+        document.getElementById('setting-vat-rate').value=s.vat_rate!==undefined?s.vat_rate:'';
+        document.getElementById('setting-tg-language').value=s.telegram_language||'bilingual';
+        const logoPath=s.logo_path;
+        const heroPath=s.hero_path;
+        const logoPreview=document.getElementById('logo-preview');
+        const heroPreview=document.getElementById('hero-preview');
+        if(logoPath){logoPreview.src=logoPath;logoPreview.style.display='block';}
+        if(heroPath){heroPreview.src=heroPath;heroPreview.style.display='block';}
+        setSettingStatus('');
+      }catch(e){setSettingStatus('Could not load settings',true);}
+    }
+    async function toggleOrdering(el){
+      try{
+        const res=await fetch('/api/settings/ordering',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({enabled:el.checked})});
+        const data=await res.json();
+        if(!res.ok)throw new Error(data.error||'Could not change ordering');
+        setSettingStatus(el.checked?'Ordering enabled':'Ordering paused');
+      }catch(e){el.checked=!el.checked;setSettingStatus(e.message,true);}
+    }
+    async function saveSettings(){
+      const values={
+        brand_name:document.getElementById('setting-brand').value.trim(),
+        tagline:document.getElementById('setting-tagline').value.trim(),
+        currency_code:document.getElementById('setting-currency-code').value.trim(),
+        currency_symbol:document.getElementById('setting-currency-symbol').value.trim()
+      };
+      try{for(const[key,value]of Object.entries(values))await putSetting(key,value);setSettingStatus('Details saved');}
+      catch(e){setSettingStatus(e.message,true);}
+    }
+    async function saveVatSettings(){
+      try{
+        await putSetting('vat_mode',document.getElementById('setting-vat-mode').value);
+        await putSetting('vat_rate',Number(document.getElementById('setting-vat-rate').value)||0);
+        setSettingStatus('VAT display settings saved (display only)');
+      }catch(e){setSettingStatus(e.message,true);}
+    }
+    async function saveTelegramLanguage(){
+      try{await putSetting('telegram_language',document.getElementById('setting-tg-language').value);setSettingStatus('Notification language saved');}
+      catch(e){setSettingStatus(e.message,true);}
+    }
+    async function uploadBranding(input,bucket){
+      const file=input.files&&input.files[0];if(!file)return;
+      if(file.size>5*1024*1024){setSettingStatus('Image is larger than 5 MB',true);return;}
+      setSettingStatus('Uploading '+bucket+' image…');
+      try{
+        const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(file);});
+        const res=await fetch('/api/menu/images',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({name:file.name,dataUrl,bucket})});
+        const out=await res.json();
+        if(!res.ok)throw new Error(out.error||'Upload failed');
+        await putSetting(bucket==='logo'?'logo_path':'hero_path',out.path);
+        const preview=document.getElementById(bucket==='logo'?'logo-preview':'hero-preview');
+        if(out.url)preview.src=out.url;
+        preview.style.display='block';
+        setSettingStatus(bucket+' image saved');
+      }catch(e){setSettingStatus(e.message,true);}
     }
 
     // STAFF
@@ -459,7 +677,7 @@ async function loadCategories(){
     async function toggleStaff(id,active){await fetch(`/api/staff/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({active})});loadStaffTable();}
     function openStaffModal(){
       document.getElementById('modal-title').textContent='Add Staff';
-      document.getElementById('modal-body').innerHTML=`<label>Username</label><input type="text" id="s-user" required><label>Full Name</label><input type="text" id="s-fname" required><label>Password</label><input type="text" id="s-pw" required><label>Role</label><select id="s-role"><option value="waiter">Waiter</option><option value="kitchen">Kitchen</option><option value="cashier">Cashier</option><option value="admin">Admin</option></select>`;
+      document.getElementById('modal-body').innerHTML=`<label>Username</label><input type="text" id="s-user" required><label>Full Name</label><input type="text" id="s-fname" required><label>Password</label><input type="text" id="s-pw" required><label>Role</label><select id="s-role"><option value="waiter">Waiter</option><option value="cashier">Cashier</option><option value="admin">Admin</option></select>`;
       document.getElementById('modal-save').onclick=async()=>{
         await fetch('/api/staff',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({username:document.getElementById('s-user').value,full_name:document.getElementById('s-fname').value,password:document.getElementById('s-pw').value,role:document.getElementById('s-role').value})});
         closeModal();loadStaffTable();
@@ -467,15 +685,11 @@ async function loadCategories(){
       document.getElementById('modal-overlay').classList.add('active');
     }
 
-    // STAFF DASHBOARD (live orders view)
-    function staffSetFilter(f,el){staffFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');loadStaffOrders();}
+    // STAFF DASHBOARD (live orders view) — uncancelled orders, cancel with reason.
     async function loadStaffOrders(){
-      const res=await fetch(`/api/orders/live?role=${userRole}`,{headers:{'Authorization':token}});
+      const res=await fetch('/api/orders/live',{headers:{'Authorization':token}});
       if(res.status===401){logout();return;}
-      let orders=await res.json();
-      if(staffFilter!=='all')orders=orders.filter(o=>o.status===staffFilter);
-      let allAmendments=[];
-      try{const aRes=await fetch('/api/amendments?status=pending',{headers:{'Authorization':token}});if(aRes.ok)allAmendments=await aRes.json();}catch(e){}
+      const orders=await res.json();
       const grid=document.getElementById('staff-orders-grid');
       const empty=document.getElementById('staff-empty-state');
       if(orders.length===0){grid.innerHTML='';empty.style.display='block';return;}
@@ -484,38 +698,35 @@ async function loadCategories(){
         const time=new Date(o.created_at).toLocaleTimeString();
         const ago=Math.floor((Date.now()-new Date(o.created_at).getTime())/60000);
         const agoStr=ago<1?'Just now':ago<60?ago+'m ago':Math.floor(ago/60)+'h ago';
-        const items=o.items.map(i=>`<li><span>${i.quantity}x ${i.name}</span><span>${i.notes?'📝 '+i.notes:''}</span></li>`).join('');
-        const orderAmendments=allAmendments.filter(a=>a.order_id===o.id);
-        const amendHtml=orderAmendments.map(a=>`
-          <div style="background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);border-radius:var(--radius-sm);padding:10px;margin:8px 0;font-size:0.82rem">
-            <i class="fas fa-exclamation-triangle" style="color:var(--warning);margin-right:4px"></i>
-            <strong style="text-transform:uppercase;color:var(--error)">${a.type}</strong> request: "${a.message}"
-            <div style="display:flex;gap:6px;margin-top:8px">
-              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--success);color:#fff" onclick="staffResolveAmendment(${a.id},'approved')"><i class="fas fa-check"></i> Approve</button>
-              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.78rem;cursor:pointer;background:var(--error);color:#fff" onclick="staffResolveAmendment(${a.id},'denied')"><i class="fas fa-times"></i> Deny</button>
-            </div>
-          </div>
-        `).join('');
-        return `<div class="order-card status-${o.status}">
-          <div class="order-header"><span class="order-number">${o.order_number}</span><span class="order-table"><i class="fas fa-chair"></i> ${o.table_name}</span></div>
-          <div class="order-time"><i class="fas fa-clock"></i> ${time} (${agoStr}) · ${o.type==='bar'?'🥤 Drinks':'🍽 Food'}</div>
+        const items=(o.items||[]).map(i=>`<li><span>${i.quantity}x ${i.name}</span><span>${i.notes?'📝 '+i.notes:''}</span></li>`).join('');
+        const table=o.table_name||(o.table_number!=null?'Table #'+o.table_number:'-');
+        return `<div class="order-card">
+          <div class="order-header"><span class="order-number">#${o.order_no}</span><span class="order-table"><i class="fas fa-chair"></i> ${table}</span></div>
+          <div class="order-time"><i class="fas fa-clock"></i> ${time} (${agoStr})</div>
           <ul class="order-items">${items}</ul>
           ${o.special_notes?`<div class="order-notes"><i class="fas fa-sticky-note"></i> ${o.special_notes}</div>`:''}
-          ${amendHtml}
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span class="order-total">ETB ${parseFloat(o.total).toFixed(2)}</span>
+            <span class="order-total">${currencyOf(o)} ${Number(o.total).toFixed(2)}</span>
             <div class="order-footer">
-              ${o.status==='pending'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--bar);color:#fff" onclick="staffUpdateStatus(${o.id},'preparing')">Start Preparing</button>`:''}
-              ${o.status==='preparing'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--success);color:#fff" onclick="staffUpdateStatus(${o.id},'ready')">Mark Ready</button>`:''}
-              ${o.status==='ready'?`<button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--dark);color:#fff" onclick="staffUpdateStatus(${o.id},'completed')">Completed</button>`:''}
-              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--error);color:#fff" onclick="staffUpdateStatus(${o.id},'cancelled')">Cancel</button>
+              <button style="padding:6px 14px;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8rem;cursor:pointer;background:var(--error);color:#fff" onclick="cancelOrderWithReason(${o.id},${o.order_no})"><i class="fas fa-ban"></i> Cancel</button>
             </div>
           </div>
         </div>`;
       }).join('');
     }
-    async function staffUpdateStatus(id,status){await fetch(`/api/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});loadStaffOrders();}
-    async function staffResolveAmendment(id,status){await fetch(`/api/amendments/${id}`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({status})});loadStaffOrders();}
+
+    // AUDIT
+    async function loadAudit(){
+      try{
+        const res=await fetch('/api/audit?limit=100',{headers:{'Authorization':token}});
+        if(!res.ok)return;
+        const rows=await res.json();
+        document.getElementById('audit-tbody').innerHTML=rows.map(a=>{
+          const details=JSON.stringify({before:a.before,after:a.after});
+          return `<tr><td style="font-size:0.75rem">${new Date(a.created_at).toLocaleString()}</td><td><strong>${a.action}</strong></td><td>${a.actor_role||a.actor_user_id||'-'}</td><td>${a.entity_type||'-'} ${a.entity_id||''}</td><td style="font-size:0.72rem;max-width:280px;word-break:break-word">${details==='{}'?'':details}</td></tr>`;
+        }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No activity recorded</td></tr>';
+      }catch(e){}
+    }
 
     // ANALYTICS
     async function loadAnalytics(period,el){

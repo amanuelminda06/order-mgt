@@ -1,23 +1,17 @@
 -- Cupcake Delight -- 001_schema.sql
+-- Simplified scope: no order status flow, no payments, no kitchen role.
+-- This file is applied by scripts/db-setup.js after a reset (no order data to migrate).
 create extension if not exists pgcrypto;
 
 do $$ begin
   if not exists (select 1 from pg_type where typname='user_role') then
-    create type user_role as enum ('admin','waiter','kitchen','cashier');
+    create type user_role as enum ('admin','cashier','waiter');
   end if;
 end $$;
 
 do $$ begin
   if not exists (select 1 from pg_type where typname='menu_section') then
     create type menu_section as enum ('food','drink','other');
-  end if;
-end $$;
-
-do $$ begin
-  if not exists (select 1 from pg_type where typname='order_status') then
-    create type order_status as enum ('pending','confirmed','preparing','ready','completed','cancelled');
-  else
-    alter type order_status add value if not exists 'confirmed';
   end if;
 end $$;
 
@@ -29,14 +23,12 @@ create table if not exists users (
   role user_role not null,
   active boolean not null default true,
   token_version integer not null default 0,
+  -- Forced password change on first/admin-reset login.
+  must_change_password boolean not null default true,
   password_changed_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
--- Trial deployments do not force a password change on first login. Drop the
--- legacy flag if an earlier version of this schema created it.
-alter table users drop column if exists must_change_password;
 
 create table if not exists menu_categories (
   id bigserial primary key,
@@ -78,28 +70,29 @@ create table if not exists dining_tables (
 
 create sequence if not exists order_number_seq start 1001 minvalue 1001;
 
+-- An order is created as "received". There is no status column and no
+-- transition flow. Cancellation is a staff-only, reason-bearing edit; the
+-- order row is never deleted.
 create table if not exists orders (
   id bigserial primary key,
   order_no integer not null unique default nextval('order_number_seq'),
+  -- Random, unguessable receipt key. The public API never accepts order_no.
+  public_token text not null unique default encode(gen_random_bytes(24), 'hex'),
   table_id bigint not null references dining_tables(id) on delete restrict,
-  status order_status not null default 'pending',
   currency text not null default 'ETB',
-  subtotal numeric(12,2) not null default 0 check (subtotal >= 0),
-  vat_mode text not null check (vat_mode in ('inclusive','exclusive')),
-  vat_rate numeric(12,2) not null default 15 check (vat_rate >= 0),
-  vat_amount numeric(12,2) not null default 0 check (vat_amount >= 0),
-  total numeric(12,2) not null default 0 check (total >= 0),
+  total numeric(12,2) not null check (total >= 0),
   special_notes text,
   cancel_reason text,
   cancelled_by bigint references users(id) on delete set null,
+  cancelled_at timestamptz,
   placed_by bigint references users(id) on delete set null,
-  updated_by bigint references users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  check (status <> 'cancelled' or (cancel_reason is not null and btrim(cancel_reason) <> ''))
+  check (cancel_reason is null or btrim(cancel_reason) <> ''),
+  check ((cancel_reason is null) = (cancelled_at is null))
 );
 create index if not exists orders_table_idx on orders (table_id);
-create index if not exists orders_status_idx on orders (status);
+create index if not exists orders_created_idx on orders (created_at desc);
 
 create table if not exists order_items (
   id bigserial primary key,
@@ -109,21 +102,12 @@ create table if not exists order_items (
   name_am_snapshot text,
   price_snapshot numeric(12,2) not null check (price_snapshot >= 0),
   quantity integer not null check (quantity > 0),
-  line_total numeric(12,2) not null check (line_total >= 0),
+  -- Exact decimal arithmetic: no float rounding in the application layer.
+  line_total numeric(12,2) not null
+    check (line_total = round(price_snapshot * quantity, 2)),
   notes text
 );
 create index if not exists order_items_order_idx on order_items (order_id);
-
-create table if not exists payments (
-  id bigserial primary key,
-  order_id bigint not null references orders(id) on delete restrict,
-  amount numeric(12,2) not null check (amount >= 0),
-  method text not null default 'cash',
-  status text not null default 'completed' check (status in ('pending','completed','failed','refunded')),
-  currency text not null default 'ETB',
-  paid_at timestamptz not null default now(),
-  created_at timestamptz not null default now()
-);
 
 create table if not exists audit_log (
   id bigserial primary key,
@@ -164,24 +148,13 @@ alter table menu_items enable row level security;
 alter table dining_tables enable row level security;
 alter table orders enable row level security;
 alter table order_items enable row level security;
-alter table payments enable row level security;
 alter table audit_log enable row level security;
 alter table settings enable row level security;
 
 do $$ declare r record; begin
   for r in select policyname, tablename from pg_policies
            where schemaname='public' and tablename in
-           ('users','menu_categories','menu_items','dining_tables','orders','order_items','payments','audit_log','settings') loop
+           ('users','menu_categories','menu_items','dining_tables','orders','order_items','audit_log','settings') loop
     execute format('drop policy if exists %I on %I', r.policyname, r.tablename);
   end loop;
 end $$;
-
-create or replace function calc_order_total(p_subtotal numeric, p_vat_mode text, p_vat_rate numeric)
-returns table (vat_amount numeric, total numeric)
-language sql as $$
-  select
-    case when p_vat_mode='exclusive' then round(p_subtotal * p_vat_rate / 100, 2)
-         else round(p_subtotal - (p_subtotal / (1 + p_vat_rate / 100)), 2) end,
-    case when p_vat_mode='exclusive' then p_subtotal + round(p_subtotal * p_vat_rate / 100, 2)
-         else p_subtotal end;
-$$;
