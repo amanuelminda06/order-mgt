@@ -16,8 +16,6 @@
     .header-logo{width:64px;height:64px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:26px;color:var(--primary);overflow:hidden}
     .header h1{font-family:var(--font-hand);font-size:2rem;color:var(--bg);margin-bottom:2px}
     .header p{font-size:0.82rem;color:rgba(255,253,245,0.85)}
-    .bilingual-sub{font-size:0.72rem;color:var(--text-muted);display:block;font-weight:400}
-    .header .bilingual-sub{color:rgba(255,253,245,0.85)}
     .receipt-wrap{max-width:560px;margin:24px auto;padding:0 16px}
     .receipt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);position:relative}
     .receipt-card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(90deg,var(--brand-yellow) 0 12px,var(--primary) 12px 24px);border-radius:var(--radius) var(--radius) 0 0}
@@ -50,35 +48,35 @@
   <div class="header">
     <div class="header-logo"><i class="fas fa-receipt"></i></div>
     <h1>Cupcake Delights</h1>
-    <p>Receipt <span class="bilingual-sub" lang="am">ደረሰኝ</span></p>
+    <p>Receipt</p>
   </div>
 
   <main class="receipt-wrap">
-    <div id="loading" class="state"><i class="fas fa-spinner fa-spin"></i><h2>Loading receipt...</h2><p>ደረሰኝዎን በማዘጋጀት ላይ</p></div>
+    <div id="loading" class="state"><i class="fas fa-spinner fa-spin"></i><h2>Loading receipt...</h2></div>
     <div id="error" class="state" style="display:none">
       <i class="fas fa-receipt"></i>
       <h2 id="error-title">Receipt not found</h2>
       <p id="error-message">This receipt link is invalid or has expired. Please ask the restaurant for help.</p>
-      <a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu <span lang="am">ወደ ምናሌ</span></a>
+      <a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu</a>
     </div>
     <div id="receipt-card" class="receipt-card" style="display:none">
       <div class="receipt-head">
-        <h2>Order Receipt <span class="bilingual-sub" lang="am">የትዕዛዝ ደረሰኝ</span></h2>
+        <h2>Order Receipt</h2>
         <span class="order-badge">#<span id="order-no"></span></span>
       </div>
       <div id="cancelled-box" class="cancelled-box" style="display:none">
-        <i class="fas fa-ban"></i> Cancelled / ተሰርዟል
+        <i class="fas fa-ban"></i> Cancelled
         <p id="cancel-reason"></p>
       </div>
-      <div class="meta-row"><span>Table / ጠረጴዛ</span><span id="table-label">-</span></div>
-      <div class="meta-row"><span>Placed / የተዘዘበት</span><span id="created-at">-</span></div>
-      <h3 class="items-head">Items <span class="bilingual-sub" lang="am">ዕቃዎች</span></h3>
+      <div class="meta-row"><span>Table</span><span id="table-label">-</span></div>
+      <div class="meta-row"><span>Placed</span><span id="created-at">-</span></div>
+      <h3 class="items-head">Items</h3>
       <div id="items"></div>
-      <div class="total-row"><span>Total / ጠቅላላ</span><span class="value" id="total"></span></div>
-      <div id="notes-box" class="notes-box" style="display:none"><strong>Special notes / ልዩ መመሪያዎች:</strong> <span id="special-notes"></span></div>
-      <div style="text-align:center"><a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu <span lang="am">ወደ ምናሌ</span></a></div>
+      <div class="total-row"><span>Total</span><span class="value" id="total"></span></div>
+      <div id="notes-box" class="notes-box" style="display:none"><strong>Special notes:</strong> <span id="special-notes"></span></div>
+      <div style="text-align:center"><a class="back-link" href="/menu.html"><i class="fas fa-utensils"></i> Back to menu</a></div>
     </div>
-    <p class="site-footer" style="margin-top:16px">Thank you for dining with us! <span lang="am">አመሰግናለን!</span></p>
+    <p class="site-footer" style="margin-top:16px">Thank you for dining with us!</p>
   </main>
 
   <script>
@@ -122,17 +120,17 @@
           <div class="item-row">
             <div>
               <span class="item-name">${item.quantity}x ${item.name}</span>
-              ${item.notes ? `<span class="item-note" lang="am">📝 ${item.notes}</span>` : ''}
+              ${item.notes ? `<span class="item-note">📝 ${item.notes}</span>` : ''}
             </div>
             <span class="item-line">${money(item.line_total, order.currency)}</span>
           </div>
-        `).join('') || '<p style="color:var(--text-muted)">No items / ዕቃ የለም</p>';
+        `).join('') || '<p style="color:var(--text-muted)">No items</p>';
 
         if (order.cancelled) {
           document.getElementById('cancelled-box').style.display = 'block';
           document.getElementById('cancel-reason').textContent = order.cancel_reason
-            ? 'Reason / ምክንያት: ' + order.cancel_reason
-            : 'This order was cancelled / ይህ ትዕዛዝ ተሰርዷል';
+            ? 'Reason: ' + order.cancel_reason
+            : 'This order was cancelled';
         }
 
         if (order.special_notes) {
