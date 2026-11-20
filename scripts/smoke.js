@@ -401,6 +401,16 @@ async function runChecks(base) {
     assert.ok(!activeTables.some((t) => Number(t.id) === Number(smokeTableId)),
       'inactive table still listed'));
 
+  // pdfkit is required at app boot: an ESM-only dependency breaks EVERY page,
+  // so assert the QR sheet actually renders a PDF (regression guard).
+  const pdfResponse = await api(base, '/api/tables/qr-sheet.pdf', { token: state.adminTok });
+  const pdfBytes = Buffer.from(await pdfResponse.arrayBuffer());
+  check('GET /api/tables/qr-sheet.pdf renders a PDF', () => {
+    assert.strictEqual(pdfResponse.status, 200, 'PDF status ' + pdfResponse.status);
+    assert.strictEqual(pdfBytes.slice(0, 4).toString(), '%PDF', 'response is not a PDF');
+    assert.ok(pdfBytes.length > 1000, 'PDF is unexpectedly small');
+  });
+
   // ── Staff admin and forced password change ───────────────
   res = await api(base, '/api/staff', {
     method: 'POST', token: state.adminTok,
