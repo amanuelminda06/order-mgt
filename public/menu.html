@@ -87,8 +87,6 @@
     .no-table h2{font-family:var(--font-serif);margin-bottom:8px}
     .no-table p{color:var(--text-muted);font-size:0.9rem}
 
-    .ordering-notice{display:none;text-align:center;font-size:0.85rem;padding:12px 16px;background:rgba(201,138,30,0.14);color:var(--warning);font-weight:600;border-bottom:1px solid var(--border)}
-    .ordering-notice.visible{display:block}
     .bilingual-sub{font-size:0.72rem;color:var(--text-muted);font-weight:400;display:block}
     .menu-card-body h4 .am{font-size:0.78rem;font-weight:400;color:var(--text-muted);margin-left:4px}
 
@@ -127,9 +125,6 @@
   <div class="tabs" id="main-tabs" style="display:none">
     <div class="tab active" data-tab="food"><i class="fas fa-utensils"></i>Restaurant <span class="bilingual-sub" lang="am">ምግብ</span></div>
     <div class="tab" data-tab="bar"><i class="fas fa-cocktail"></i>Drinks <span class="bilingual-sub" lang="am">መጠጥ</span></div>
-  </div>
-  <div id="ordering-notice" class="ordering-notice">
-    <i class="fas fa-pause-circle"></i> Ordering is paused right now — please browse the menu, or ask our staff. <span lang="am">ማዘዣ ለጊዜው ተቋርጧል፤ ምናሌውን ማየት ይችላሉ።</span>
   </div>
   <div id="price-note" style="display:none;text-align:center;font-size:0.78rem;color:var(--text-muted);padding:10px 16px 0">
     All prices are inclusive of VAT and service charge where applicable. <span lang="am">ዋጋዎች ተ.እ.ታና የአገልግሎት ክፍያን ሊያካትቱ ይችላሉ።</span>
@@ -334,6 +329,12 @@
     function renderMenuItem(item) {
       const qty = getCartQty(item.id);
       const image = item.image_path || item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80';
+      // No add/remove controls at all while ordering is paused.
+      const qtyControls = !orderingEnabled ? '' : (qty > 0 ? `<div class="qty-control">
+        <button class="qty-btn" onclick="updateCart(${item.id},-1)">-</button>
+        <span class="qty-val">${qty}</span>
+        <button class="qty-btn" onclick="updateCart(${item.id},1)">+</button>
+      </div>` : `<button class="qty-btn" style="background:var(--primary);color:#fff;border-color:var(--primary)" onclick="updateCart(${item.id},1)">+</button>`);
       return `<div class="menu-card ${item.available ? '' : 'unavailable'}">
         <img class="menu-card-img" src="${image}" alt="${item.name}" loading="lazy">
         <div class="menu-card-body">
@@ -343,11 +344,7 @@
           </div>
           <div class="menu-card-footer">
             <span class="menu-price">${fmtMoney(item.price)}</span>
-            ${qty > 0 ? `<div class="qty-control">
-              <button class="qty-btn" onclick="updateCart(${item.id},-1)">-</button>
-              <span class="qty-val">${qty}</span>
-              <button class="qty-btn" onclick="updateCart(${item.id},1)">+</button>
-            </div>` : `<button class="qty-btn" style="background:var(--primary);color:#fff;border-color:var(--primary)" onclick="updateCart(${item.id},1)">+</button>`}
+            ${qtyControls}
           </div>
         </div>
       </div>`;
@@ -500,9 +497,12 @@
         if (s.tagline) document.getElementById('restaurant-tagline').textContent = s.tagline;
         if (s.currency_symbol) currencySymbol = s.currency_symbol;
         orderingEnabled = s.ordering_enabled !== false && String(s.ordering_enabled) !== 'false';
-        document.getElementById('ordering-notice').classList.toggle('visible', !orderingEnabled);
         const placeBtn = document.getElementById('place-order-btn');
         placeBtn.disabled = !orderingEnabled;
+        // Settings and menu load concurrently; re-render so the + controls
+        // reflect the real ordering state whichever response arrives first.
+        renderFoodGrid();
+        renderBarGrid();
         updateCartBar();
       } catch (e) { /* Defaults are safe: ordering allowed until settings load. */ }
     }
