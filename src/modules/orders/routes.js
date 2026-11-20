@@ -68,9 +68,10 @@ router.post('/api/orders', asyncHandler(async (req, res) => {
     ip: req.ip,
   });
 
-  // Notification is fire-and-forget: the order is already committed.
+  // Order is already committed. On Vercel serverless the runtime can freeze
+  // after the response, so await delivery (sendTelegram swallows its own errors).
   const lines = order.items.map((i) => `  ${i.quantity}x ${i.name}`).join('\n');
-  sendTelegram(`🍽 <b>NEW ORDER</b>\n\n📋 <b>${order.order_no}</b>\n💰 ETB ${order.total}\n\n<b>Items:</b>\n${lines}`)
+  await sendTelegram(`🍽 <b>NEW ORDER</b>\n\n📋 <b>${order.order_no}</b>\n💰 ETB ${order.total}\n\n<b>Items:</b>\n${lines}`)
     .catch(() => {});
 
   res.json(order);

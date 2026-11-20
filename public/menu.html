@@ -87,6 +87,10 @@
     .no-table h2{font-family:var(--font-serif);margin-bottom:8px}
     .no-table p{color:var(--text-muted);font-size:0.9rem}
 
+    .last-receipt-bar{display:none;max-width:600px;margin:12px auto 0;padding:0 16px}
+    .last-receipt-bar a{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:rgba(145,73,48,0.08);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--primary);font-weight:700;font-size:0.85rem;text-decoration:none}
+    .last-receipt-bar a:hover{background:rgba(145,73,48,0.14)}
+
     .order-confirm-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center}
     .order-confirm-modal.active{display:flex}
     .order-confirm-panel{background:var(--card);border-radius:var(--radius);padding:32px 24px;max-width:400px;width:90%;text-align:center}
@@ -126,6 +130,7 @@
   <div id="price-note" style="display:none;text-align:center;font-size:0.78rem;color:var(--text-muted);padding:10px 16px 0">
     All prices are inclusive of VAT and service charge where applicable.
   </div>
+  <div class="last-receipt-bar" id="last-receipt-bar"><a id="last-receipt-link" href="#"><i class="fas fa-receipt"></i> View your last receipt</a></div>
 
   <div id="food-section" class="menu-section active">
     <div class="section-header">
@@ -221,6 +226,7 @@
     loadMenu();
     loadSettings();
     resolveTable();
+    showLastReceipt();
 
     function fmtMoney(value) {
       return currencySymbol + ' ' + Number(value || 0).toFixed(2);
@@ -228,6 +234,17 @@
 
     function receiptStorageKey() {
       return 'cd_receipt_table_' + (activeTableNumber || 'manual');
+    }
+
+    function showLastReceipt() {
+      try {
+        const token = sessionStorage.getItem(receiptStorageKey());
+        const bar = document.getElementById('last-receipt-bar');
+        const link = document.getElementById('last-receipt-link');
+        if (!token || !bar || !link) { if (bar) bar.style.display = 'none'; return; }
+        link.href = '/receipt/' + encodeURIComponent(token);
+        bar.style.display = 'block';
+      } catch (e) { /* sessionStorage unavailable */ }
     }
 
     // The QR code carries table_number; the orders API needs the table id.
@@ -444,6 +461,7 @@
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Could not place order');
         sessionStorage.setItem(receiptStorageKey(), data.public_token);
+        showLastReceipt();
         cart = [];
         updateCartBar();
         renderFoodGrid();
