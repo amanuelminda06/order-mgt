@@ -11,6 +11,8 @@ Cafe & bakery ordering with table QR codes.
 - Telegram notifications (bilingual by setting), never blocking an order
 - Supabase-backed auth, RBAC and append-only audit log
 - Forced password change on first/admin-reset login; HttpOnly session cookie
+- Login lockout is per device (5 failures / 15 min) with a looser per-IP cap;
+  an admin can clear all lockouts via `POST /api/auth/unlock-logins`
 - VAT settings are display only — totals are computed from DB prices, exactly
 
 ## Roles

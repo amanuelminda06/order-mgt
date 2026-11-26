@@ -338,6 +338,14 @@
   <script>
     let token='', userRole='', currentOrderFilter='all', currentMenuFilter='all', editId=null, staffRefreshInterval, allCategories=[], pendingLogin=null;
 
+    // A stable per-browser id keeps the login attempt limit separate for each
+    // device, even when staff share one public IP (same Wi-Fi or proxy).
+    function getDeviceId(){
+      let id=localStorage.getItem('cd_device_id');
+      if(!id){ id='dev_'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('cd_device_id',id); }
+      return id;
+    }
+
     // ── Staff-facing EN / AM language toggle ──────────────────────
     // Customer pages stay English-only; this switch only affects the admin and
     // staff views. The choice is kept in localStorage so it survives reloads.
@@ -471,7 +479,7 @@
       const errEl=document.getElementById('login-error'); errEl.style.display='none';
       const username=document.getElementById('username').value;
       const password=document.getElementById('password').value;
-      const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+      const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,device_id:getDeviceId()})});
       const data=await res.json();
       if (!res.ok) { errEl.textContent=data.error||'Login failed'; errEl.style.display='block'; return; }
       if (data.must_change_password && data.force_password_change) {

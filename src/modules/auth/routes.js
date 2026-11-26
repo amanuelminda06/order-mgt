@@ -20,22 +20,40 @@ function setSessionCookie(res, token) {
   });
 }
 
+function deviceKey(req, username) {
+  const deviceId = (req.body && req.body.device_id) || req.get('x-device-id');
+  return guard.keyFor(username, req.ip, deviceId);
+}
+
+function retryMessage(seconds) {
+  if (!seconds) return 'Too many attempts';
+  if (seconds < 60) return `Too many attempts. Try again in ${seconds} seconds.`;
+  const minutes = Math.ceil(seconds / 60);
+  return `Too many attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`;
+}
+
 router.post('/api/login', asyncHandler(async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
 
-  const key = guard.keyFor(username, req.ip);
-  if (!guard.allowed(key)) return res.status(429).json({ error: 'Too many attempts' });
+  const dKey = deviceKey(req, username);
+  const iKey = guard.ipKeyFor(username, req.ip);
+  if (!guard.allowed(dKey) || !guard.allowed(iKey, guard.IP_MAX_FAILURES)) {
+    const retry = Math.max(guard.retryAfter(dKey), guard.retryAfter(iKey, guard.IP_MAX_FAILURES));
+    return res.status(429).json({ error: retryMessage(retry), retry_after: retry });
+  }
 
   const user = await findUserByUsername(username);
   const ok = user && user.active && bcrypt.compareSync(password, user.password_hash);
   if (!ok) {
-    guard.fail(key);
+    guard.fail(dKey);
+    guard.fail(iKey, guard.IP_MAX_FAILURES);
     await appendAudit({ actor: user, action: 'auth.login_failed', entityType: 'user', entityId: username, ip: req.ip });
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  guard.clear(key);
+  guard.clear(dKey);
+  guard.clear(iKey);
   const token = sign(user);
   setSessionCookie(res, token);
   await appendAudit({ actor: user, action: 'auth.login', entityType: 'user', entityId: user.id, ip: req.ip });
@@ -68,6 +86,15 @@ router.post('/api/auth/change-password', requireAuth, asyncHandler(async (req, r
   const token = sign(updated);
   setSessionCookie(res, token);
   res.json({ success: true, token });
+}));
+
+// Admin escape hatch: clears in-process login lockouts immediately.
+router.post('/api/auth/unlock-logins', requireAuth, requirePermission('staff.write'), asyncHandler(async (req, res) => {
+  guard.resetAll();
+  await appendAudit({
+    actor: req.user, action: 'auth.login_unlock', entityType: 'system', entityId: 'login', ip: req.ip,
+  });
+  res.json({ success: true });
 }));
 
 // Admin reset: generates a temporary password and forces a change on login.

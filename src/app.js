@@ -23,6 +23,11 @@ const pageRoutes = require('./modules/pages/routes');
 function createApp() {
   const app = express();
 
+  // Behind Vercel (or any reverse proxy) the socket address is the proxy's,
+  // not the client's. Trust one hop so req.ip reflects X-Forwarded-For and
+  // the login limiter does not share one bucket across every device.
+  app.set('trust proxy', 1);
+
   app.use(cors());
   // Menu photos arrive as base64 data URLs, so the JSON body can exceed the
   // 100kb default (5 MB image ≈ 6.7 MB encoded).
