@@ -174,9 +174,10 @@ if a browser client is introduced. (The sequence needs no RLS.)
 variables: `admin`, `waiter1`, `cashier1`. **There is no `kitchen1`.** Every
 seeded user has `must_change_password = true`.
 
-`sql/004_menu.sql` seeds 15 categories / 114 items (9 food + 6 drink sections)
+`sql/004_menu.sql` seeds 15 categories / 118 items (9 food + 6 drink sections)
 and refuses to run once `order_items` exist, so live receipts cannot be
-orphaned.
+orphaned. Existing databases get the printed-menu price updates via
+`npm run migrate:menu` (`sql/013_menu_update.sql`).
 
 Provision a **fresh** project with:
 
@@ -259,7 +260,7 @@ that purge.
 
 After `npm run setup`, the script checks: 8 tables, 3 roles / 3 seed users,
 no payments/status/VAT columns, `public_token` unique, cancel-reason check,
-`must_change_password` and display-only VAT settings, 30 tables, 15/114 menu
+`must_change_password` and display-only VAT settings, 30 tables, 15/118 menu
 rows, settings, RLS on 8 tables and append-only audit triggers.
 
 Useful queries:

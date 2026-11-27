@@ -32,6 +32,7 @@ The live DB has real menu items, categories and table tokens. Run, with a
 npm run backup         # timestamped in-DB snapshot, written first
 npm run migrate        # applies sql/010_simplify.sql in place
 npm run migrate:step4  # adds the atomic create_order RPC (idempotent)
+npm run migrate:menu   # syncs printed-menu prices and adds missing items
 npm run verify:db      # read-only schema/data checks (never applies SQL or seeds)
 ```
 

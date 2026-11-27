@@ -13,6 +13,7 @@
     "backup": "node scripts/backup-db.js",
     "migrate": "node scripts/migrate.js",
     "migrate:step4": "node scripts/apply-sql.js sql/012_step4.sql",
+    "migrate:menu": "node scripts/apply-sql.js sql/013_menu_update.sql",
     "seed:users": "node scripts/seed-users.js",
     "seed:smoke-users": "node scripts/seed-smoke-users.js",
     "smoke": "node scripts/smoke.js",
