@@ -129,6 +129,17 @@ update menu_items i
    and c.name = v.cat
    and i.name = v.name;
 
+-- Realistic menu photos for the four items added above.
+update menu_items i
+   set image_path = v.image_path
+  from (values
+    ('Fasting Croissant', '/uploads/menu/item-119.jpg'),
+    ('Fasting Cinnamon', '/uploads/menu/item-120.jpg'),
+    ('Continental Strawberry Cake', '/uploads/menu/item-121.jpg'),
+    ('Small Macchiato', '/uploads/menu/item-122.jpg')
+       ) as v(name, image_path)
+ where i.name = v.name;
+
 -- Items on the printed menu that were missing from the database.
 insert into menu_items (name, description, category_id, price, available, sort_order)
 select v.name, null, c.id, v.price, true, v.ord

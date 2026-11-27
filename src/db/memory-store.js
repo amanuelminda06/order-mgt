@@ -175,10 +175,10 @@ const menuItems = [
   { id:112, name:'Coca Cola', description:'', price:150, category:'bar', subcategory:'Soft Drinks', available:true, image:'/uploads/menu/item-112.jpg' },
   { id:113, name:'Novida', description:'', price:150, category:'bar', subcategory:'Soft Drinks', available:true, image:'/uploads/menu/item-113.jpg' },
   { id:114, name:'Ambo Water', description:'', price:150, category:'bar', subcategory:'Soft Drinks', available:true, image:'/uploads/menu/food-soft-drinks.jpg' },
-  { id:115, name:'Fasting Croissant', description:'', price:400, category:'food', subcategory:'Desserts', available:true, image:'' },
-  { id:116, name:'Fasting Cinnamon', description:'', price:400, category:'food', subcategory:'Desserts', available:true, image:'' },
-  { id:117, name:'Continental Strawberry Cake', description:'', price:700, category:'food', subcategory:'Desserts', available:true, image:'' },
-  { id:118, name:'Small Macchiato', description:'', price:130, category:'bar', subcategory:'Coffee', available:true, image:'' },
+  { id:115, name:'Fasting Croissant', description:'', price:400, category:'food', subcategory:'Desserts', available:true, image:'/uploads/menu/item-119.jpg' },
+  { id:116, name:'Fasting Cinnamon', description:'', price:400, category:'food', subcategory:'Desserts', available:true, image:'/uploads/menu/item-120.jpg' },
+  { id:117, name:'Continental Strawberry Cake', description:'', price:700, category:'food', subcategory:'Desserts', available:true, image:'/uploads/menu/item-121.jpg' },
+  { id:118, name:'Small Macchiato', description:'', price:130, category:'bar', subcategory:'Coffee', available:true, image:'/uploads/menu/item-122.jpg' },
 ];
 
 // ── Staff fixtures (no credentials live in source) ────────
