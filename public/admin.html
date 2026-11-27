@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--brand-yellow:#F9E88C;--primary:#AB4A51;--primary-dark:#7A2F38;--accent:#E8B75C;--dark:#7A2F38;--dark2:#AB4A51;--text:#7A2F38;--text-muted:rgba(122,47,56,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#AB4A51;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(122,47,56,0.10)}
+    :root{--brand-yellow:#F9E88C;--primary:#AB4A51;--primary-dark:#7A2F38;--accent:#F9E88C;--dark:#7A2F38;--dark2:#AB4A51;--text:#7A2F38;--text-muted:rgba(122,47,56,0.68);--bg:#FFF9E0;--card:#F9E88C;--border:rgba(171,74,81,0.35);--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#AB4A51;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(122,47,56,0.10)}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh}
     .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
     .login-box{background:var(--card);padding:40px;border-radius:var(--radius);border:1px solid var(--border);max-width:400px;width:100%;box-shadow:var(--shadow)}
@@ -32,7 +32,7 @@
     .admin-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--card);flex-shrink:0}
     .admin-header h2{font-family:var(--font-hand);font-size:1.35rem;font-weight:400;letter-spacing:0.5px}
     .admin-header .user-info{font-size:0.8rem;opacity:0.7}
-    .admin-tabs{display:flex;overflow-x:auto;border-bottom:2px solid var(--accent);background:var(--brand-yellow);position:sticky;top:62px;z-index:99}
+    .admin-tabs{display:flex;overflow-x:auto;border-bottom:2px solid var(--primary);background:var(--brand-yellow);position:sticky;top:62px;z-index:99}
     .admin-tab{padding:14px 20px;font-size:0.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
     .admin-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
     .admin-tab i{margin-right:6px}
@@ -84,7 +84,7 @@
     .settings-card input[type=text],.settings-card input[type=number],.settings-card select{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);background:var(--bg);color:var(--text)}
     .settings-card .switch-row{display:flex;align-items:center;gap:10px;font-weight:700}
     .settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-    .display-only{display:inline-block;background:rgba(201,138,30,0.16);color:var(--warning);border-radius:6px;padding:2px 8px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px}
+    .display-only{display:inline-block;background:rgba(171,74,81,0.12);color:var(--primary);border-radius:6px;padding:2px 8px;font-size:0.68rem;font-weight:700;letter-spacing:0.4px}
     .upload-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
     .upload-row img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:var(--bg)}
     .notice-line{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px}
@@ -115,7 +115,7 @@
     .order-card .order-items{margin:10px 0;font-size:0.85rem;list-style:none;padding:0}
     .order-card .order-items li{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
     .order-card .order-items li:last-child{border:none}
-    .order-card .order-notes{background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);padding:8px;border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text);margin:8px 0}
+    .order-card .order-notes{background:rgba(249,232,140,0.45);border:1px solid rgba(171,74,81,0.35);padding:8px;border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text);margin:8px 0}
     .order-card .order-footer{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
     .order-card .order-total{font-weight:700;color:var(--primary);font-size:1rem}
     @media(min-width:600px){.orders-grid{grid-template-columns:1fr 1fr}}

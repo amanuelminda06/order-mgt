@@ -10,12 +10,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--brand-yellow:#F9E88C;--primary:#AB4A51;--primary-dark:#7A2F38;--dark:#7A2F38;--dark2:#AB4A51;--text:#7A2F38;--text-muted:rgba(122,47,56,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--accent:#E8B75C;--success:#27ae60;--error:#b3402f;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(122,47,56,0.10)}
+    :root{--brand-yellow:#F9E88C;--primary:#AB4A51;--primary-dark:#7A2F38;--dark:#7A2F38;--dark2:#AB4A51;--text:#7A2F38;--text-muted:rgba(122,47,56,0.68);--bg:#FFF9E0;--card:#F9E88C;--border:rgba(171,74,81,0.35);--accent:#F9E88C;--success:#27ae60;--error:#b3402f;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(122,47,56,0.10)}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding-bottom:40px}
     .header{background:linear-gradient(135deg,rgba(122,47,56,0.88),rgba(171,74,81,0.78)),url('/pics/cupcake%20hero.jpg') center/cover no-repeat,var(--dark);padding:24px 16px;text-align:center;color:#fff}
     .header-logo{width:64px;height:64px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:26px;color:var(--primary);overflow:hidden}
     .header h1{font-family:var(--font-hand);font-size:2rem;color:var(--bg);margin-bottom:2px}
-    .header p{font-size:0.82rem;color:rgba(255,253,245,0.85)}
+    .header p{font-size:0.82rem;color:rgba(249,232,140,0.85)}
     .receipt-wrap{max-width:560px;margin:24px auto;padding:0 16px}
     .receipt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);position:relative}
     .receipt-card::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(90deg,var(--brand-yellow) 0 12px,var(--primary) 12px 24px);border-radius:var(--radius) var(--radius) 0 0}
@@ -32,7 +32,7 @@
     .item-row .item-line{font-weight:700;white-space:nowrap;color:var(--primary)}
     .total-row{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--primary);margin-top:14px;padding-top:14px;font-size:1.2rem;font-weight:700}
     .total-row .value{color:var(--primary);font-family:var(--font-serif)}
-    .notes-box{margin-top:16px;background:rgba(232,183,92,0.18);border:1px solid rgba(232,183,92,0.55);border-radius:var(--radius-sm);padding:12px;font-size:0.85rem}
+    .notes-box{margin-top:16px;background:rgba(249,232,140,0.45);border:1px solid rgba(171,74,81,0.35);border-radius:var(--radius-sm);padding:12px;font-size:0.85rem}
     .cancelled-box{margin-bottom:20px;background:rgba(179,64,47,0.12);border:1px solid var(--error);border-radius:var(--radius-sm);padding:14px;color:var(--error);font-weight:700}
     .cancelled-box p{font-weight:400;font-size:0.85rem;margin-top:6px;color:var(--text)}
     .state{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:48px 20px;box-shadow:var(--shadow)}
