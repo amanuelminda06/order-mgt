@@ -249,6 +249,13 @@
           <div class="settings-actions"><button class="btn btn-sm btn-success" onclick="saveSettings()">Save details</button></div>
         </div>
         <div class="settings-card">
+          <h4><i class="fas fa-list"></i> Menu headings</h4>
+          <p class="hint">Subtitles shown under the Restaurant and Drinks menus on the customer page.</p>
+          <label>Food section subtitle</label><input type="text" id="setting-food-tagline">
+          <label>Drinks section subtitle</label><input type="text" id="setting-drinks-tagline">
+          <div class="settings-actions"><button class="btn btn-sm btn-success" onclick="saveMenuHeadings()">Save headings</button></div>
+        </div>
+        <div class="settings-card">
           <h4><i class="fas fa-percent"></i> VAT display <span class="display-only">DISPLAY ONLY</span></h4>
           <p class="hint">Shown to customers for information only — not added to totals.</p>
           <label>VAT mode</label>
@@ -748,6 +755,8 @@ async function loadCategories(){
         document.getElementById('setting-ordering').checked=s.ordering_enabled!==false&&String(s.ordering_enabled)!=='false';
         document.getElementById('setting-brand').value=s.brand_name||s.restaurant_name||'';
         document.getElementById('setting-tagline').value=s.tagline||'';
+        document.getElementById('setting-food-tagline').value=s.food_tagline!==undefined?s.food_tagline:'Fresh dishes crafted with love';
+        document.getElementById('setting-drinks-tagline').value=s.drinks_tagline!==undefined?s.drinks_tagline:'Coffee, tea, juices, smoothies & refreshers';
         document.getElementById('setting-currency-code').value=s.currency_code||'ETB';
         document.getElementById('setting-currency-symbol').value=s.currency_symbol||s.currency_code||'ETB';
         document.getElementById('setting-vat-mode').value=s.vat_mode||'inclusive';
@@ -778,6 +787,14 @@ async function loadCategories(){
         currency_symbol:document.getElementById('setting-currency-symbol').value.trim()
       };
       try{for(const[key,value]of Object.entries(values))await putSetting(key,value);setSettingStatus('Details saved');}
+      catch(e){setSettingStatus(e.message,true);}
+    }
+    async function saveMenuHeadings(){
+      const values={
+        food_tagline:document.getElementById('setting-food-tagline').value.trim(),
+        drinks_tagline:document.getElementById('setting-drinks-tagline').value.trim()
+      };
+      try{for(const[key,value]of Object.entries(values))await putSetting(key,value);setSettingStatus('Menu headings saved');}
       catch(e){setSettingStatus(e.message,true);}
     }
     async function saveVatSettings(){

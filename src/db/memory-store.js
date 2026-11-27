@@ -221,6 +221,8 @@ const amendments = [];
 const settings = {
   restaurant_name: 'Cupcake Delights',
   tagline: 'Freshly baked, every day',
+  food_tagline: 'Fresh dishes crafted with love',
+  drinks_tagline: 'Coffee, tea, juices, smoothies & refreshers',
   phone: '+251 978 020 270',
   phone_alt: '+251 91 112 1119',
   address: 'Bole Medihanialem, Robel Plaza, Ground Floor',

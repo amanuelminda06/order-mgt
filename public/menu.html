@@ -135,7 +135,7 @@
   <div id="food-section" class="menu-section active">
     <div class="section-header">
       <h2>Restaurant Menu</h2>
-      <p>Fresh dishes crafted with love</p>
+      <p id="food-section-tagline">Fresh dishes crafted with love</p>
     </div>
     <div class="category-pills" id="food-pills"></div>
     <div class="menu-grid" id="food-grid"></div>
@@ -144,7 +144,7 @@
   <div id="bar-section" class="menu-section">
     <div class="section-header">
       <h2>Drinks Menu</h2>
-      <p>Coffee, tea, juices, smoothies & refreshers</p>
+      <p id="drinks-section-tagline">Coffee, tea, juices, smoothies & refreshers</p>
     </div>
     <div class="category-pills" id="bar-pills"></div>
     <div class="menu-grid" id="bar-grid"></div>
@@ -510,6 +510,8 @@
         const brandName = s.brand_name || s.restaurant_name;
         if (brandName) document.getElementById('restaurant-name').textContent = brandName;
         if (s.tagline) document.getElementById('restaurant-tagline').textContent = s.tagline;
+        if (s.food_tagline !== undefined && s.food_tagline !== null) document.getElementById('food-section-tagline').textContent = s.food_tagline;
+        if (s.drinks_tagline !== undefined && s.drinks_tagline !== null) document.getElementById('drinks-section-tagline').textContent = s.drinks_tagline;
         if (s.currency_symbol) currencySymbol = s.currency_symbol;
         orderingEnabled = s.ordering_enabled !== false && String(s.ordering_enabled) !== 'false';
         const placeBtn = document.getElementById('place-order-btn');
