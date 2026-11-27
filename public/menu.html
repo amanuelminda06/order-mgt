@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#F9E98A">
+  <meta name="theme-color" content="#F9E88C">
   <title>Cupcake Delights</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--brand-yellow:#F9E98A;--primary:#914930;--primary-dark:#5B382D;--dark:#5B382D;--dark2:#914930;--dark3:#E8B75C;--text:#5B382D;--text-muted:rgba(91,56,45,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--accent:#E8B75C;--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#5B382D;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(91,56,45,0.10)}
+    :root{--brand-yellow:#F9E88C;--primary:#AB4A51;--primary-dark:#7A2F38;--dark:#7A2F38;--dark2:#AB4A51;--dark3:#E8B75C;--text:#7A2F38;--text-muted:rgba(122,47,56,0.68);--bg:#FFFDF5;--card:#F6DFAE;--border:#E8B75C;--accent:#E8B75C;--success:#27ae60;--error:#b3402f;--warning:#c98a1e;--bar:#AB4A51;--font-hand:'Patrick Hand',cursive;--font-serif:'Playfair Display',serif;--font-sans:'Nunito',sans-serif;--radius:14px;--radius-sm:8px;--shadow:0 2px 12px rgba(122,47,56,0.10)}
     html{scroll-behavior:smooth}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;padding-bottom:80px}
 
-    .header{background:linear-gradient(135deg,rgba(91,56,45,0.88),rgba(145,73,48,0.78)),url('/pics/cupcake%20hero.jpg') center/cover no-repeat,var(--dark);padding:24px 16px;text-align:center;color:#fff;position:sticky;top:0;z-index:100}
+    .header{background:linear-gradient(135deg,rgba(122,47,56,0.88),rgba(171,74,81,0.78)),url('/pics/cupcake%20hero.jpg') center/cover no-repeat,var(--dark);padding:24px 16px;text-align:center;color:#fff;position:sticky;top:0;z-index:100}
     .header-logo{position:relative;overflow:hidden;width:64px;height:64px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:26px;color:var(--primary)}
     .header-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
     .header h1{font-family:var(--font-hand);font-size:1.8rem;letter-spacing:0.5px;color:var(--bg);margin-bottom:2px}
@@ -88,8 +88,8 @@
     .no-table p{color:var(--text-muted);font-size:0.9rem}
 
     .last-receipt-bar{display:none;max-width:600px;margin:12px auto 0;padding:0 16px}
-    .last-receipt-bar a{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:rgba(145,73,48,0.08);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--primary);font-weight:700;font-size:0.85rem;text-decoration:none}
-    .last-receipt-bar a:hover{background:rgba(145,73,48,0.14)}
+    .last-receipt-bar a{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:rgba(171,74,81,0.08);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--primary);font-weight:700;font-size:0.85rem;text-decoration:none}
+    .last-receipt-bar a:hover{background:rgba(171,74,81,0.14)}
 
     .order-confirm-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center}
     .order-confirm-modal.active{display:flex}
@@ -101,7 +101,7 @@
     .order-confirm-numbers .order-num-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.9rem}
     .order-confirm-numbers .order-num-item .label{color:var(--text-muted)}
     .order-confirm-numbers .order-num-item .value{font-weight:700;color:var(--primary);font-size:1rem}
-    .order-confirm-panel .receipt-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;background:rgba(145,73,48,0.08);padding:10px;border-radius:var(--radius-sm)}
+    .order-confirm-panel .receipt-hint{font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;background:rgba(171,74,81,0.08);padding:10px;border-radius:var(--radius-sm)}
     .order-confirm-panel .receipt-hint i{color:var(--primary);margin-right:4px}
     .order-confirm-panel .receipt-link{display:block;width:100%;padding:14px;margin-bottom:8px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:0.95rem;text-decoration:none}
     .order-confirm-panel .receipt-link i{margin-right:6px}
@@ -117,7 +117,7 @@
 </head>
 <body>
   <div class="header">
-    <div class="header-logo"><i class="fas fa-utensils"></i><img src="/pics/cupcake%20logo2.jpg" alt="Cupcake Delights logo" onerror="this.remove()"></div>
+    <div class="header-logo"><i class="fas fa-utensils"></i><img src="/pics/cupcake-logo.png" alt="Cupcake Delights logo" onerror="this.remove()"></div>
     <h1 id="restaurant-name">Cupcake Delights</h1>
     <p id="restaurant-tagline">Freshly baked, every day</p>
     <div class="table-badge" id="table-badge" style="display:none"><i class="fas fa-chair"></i> Table <span id="table-number"></span></div>
